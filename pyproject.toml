@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "tom-swift"
+version = "0.1.0"
+description = "TOM Toolkit Facility module for the Neil Gehrels Swift Observatory"
+authors = ["Lindy Lindstrom <llindstrom@lco.global>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+packages = [{include = "tom_swift"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+tomtoolkit = "^2.10"
+BatAnalysis = "^0.0.2"
+django-crispy-forms = "^1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
