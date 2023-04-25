@@ -35,7 +35,7 @@ Include the following settings inside the `FACILITIES` dictionary inside `settin
 ```python
 FACILITIES = {
    ...
-   'Swift': {
+   'SWIFT': {
      'SWIFT_USERNAME': os.getenv('SWIFT_USERNAME', 'anonymous')
      'SWIFT_SHARED_SECRET': os.getenv('SWIFT_SHARED_SECRET', 'anonymous'),
     },
