@@ -19,6 +19,12 @@ __pycache__/
 # C extensions
 *.so
 
+# Helm and k8s
+*secrets*.yaml
+*secrets*.sh
+skaffold.yaml
+
+
 # Distribution / packaging
 .Python
 env/
