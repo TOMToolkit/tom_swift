@@ -21,7 +21,7 @@ pip install tom-swift
 Add `tom_swift.swift.SwiftFacility` to the `TOM_FACILITY_CLASSES` in your TOM's
 `settings.py`:
 ```python
-      TOM_FACILITY_CLASSES = [
+    TOM_FACILITY_CLASSES = [
         'tom_observations.facilities.lco.LCOFacility',
         ...
         'tom_swift.swift.SwiftFacility',
@@ -33,13 +33,13 @@ Add `tom_swift.swift.SwiftFacility` to the `TOM_FACILITY_CLASSES` in your TOM's
 Include the following settings inside the `FACILITIES` dictionary inside `settings.py`:
 
 ```python
-FACILITIES = {
-   ...
-   'SWIFT': {
-     'SWIFT_USERNAME': os.getenv('SWIFT_USERNAME', 'anonymous')
-     'SWIFT_SHARED_SECRET': os.getenv('SWIFT_SHARED_SECRET', 'anonymous'),
-    },
-}
+    FACILITIES = {
+        ...
+        'SWIFT': {
+            'SWIFT_USERNAME': os.getenv('SWIFT_USERNAME', 'anonymous'),
+            'SWIFT_SHARED_SECRET': os.getenv('SWIFT_SHARED_SECRET', 'anonymous'),
+        },
+    }
 ```
 
 If you followed the Prerequsites section above, then you have a Swift TOO username and shared secret.

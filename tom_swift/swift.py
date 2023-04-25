@@ -32,7 +32,7 @@ class SwiftObservationForm(forms.Form):
 #
     pass
 
-class SwiftFacility(BaseRoboticObservationFacility):
+class SwiftFacility:
     name = 'Swift'
     observation_types = [
         ('OBSERVATION', 'Custom Observation')
