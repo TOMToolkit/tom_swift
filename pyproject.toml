@@ -9,7 +9,7 @@ readme = "README.md"
 packages = [{include = "tom_swift"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.8,<3.12"
 tomtoolkit = "^2.10"
 BatAnalysis = "^0.0.2"
 django-crispy-forms = "^1"
