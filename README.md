@@ -48,8 +48,8 @@ and `SWIFT_SHARED_SECRET` to your Swift TOO username and shared secret, respecti
 into any software repository).
 
 ```shell
-export SWIFT_USERNAME=<your Swift TOO usename>
-export SWIFT_SHARED_SECRET=<your Swift TOO shared secret>
+export SWIFT_USERNAME='<your Swift TOO usename>'
+export SWIFT_SHARED_SECRET='<your Swift TOO shared secret>'
 ```
 
 The `settings.FACILITIES['Swift']` configuration dictionary
