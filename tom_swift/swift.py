@@ -41,6 +41,21 @@ class SwiftFacility:
     observation_forms = {
         'OBSERVATION': SwiftObservationForm
     }
+    template_name = 'tom_swift/observation_form.html'
+
+    def get_facility_context_data(self, **kwargs):
+        """Provide Facility-specific data to context for ObservationCreateView's template
+
+        This method is called by ObservationCreateView.get_context_data() and returns a
+        dictionary of context data to be added to the View's context
+        """
+        facility_context_data = super().get_facility_context_data(**kwargs)
+        new_context_data = {
+            'version': __version__  # from tom_swift/__init__.py
+        }
+        facility_context_data.update(new_context_data)
+
+        return facility_context_data
 
     def get_form(self, observation_type):
         return SwiftObservationForm
