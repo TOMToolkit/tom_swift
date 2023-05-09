@@ -12,7 +12,7 @@ packages = [{include = "tom_swift"}]
 python = ">=3.8,<3.12"
 tomtoolkit = "^2.10"
 BatAnalysis = "^0.0.2"
-django-crispy-forms = "^1"
+django-crispy-forms = "^2"
 
 
 [tool.poetry-dynamic-versioning]
