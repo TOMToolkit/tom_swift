@@ -5,9 +5,7 @@ from django.conf import settings
 
 from tom_observations.facility import BaseRoboticObservationForm, BaseRoboticObservationFacility
 
-
-
-class SwiftObservationForm(forms.Form):
+class SwiftObservationForm(BaseObservationForm):
     # TODO: cannot user BaseRoboticObservationForm b/c it assumes
     #   (in tom_observations/templatetags/observation_extras.py::L#110 get_sidereal_visibility)
     #   that the Facility has a fixed Lat/Lon, lol. 
