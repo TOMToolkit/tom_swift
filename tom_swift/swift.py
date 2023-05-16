@@ -48,11 +48,15 @@ class SwiftFacility:
         dictionary of context data to be added to the View's context
         """
         facility_context_data = super().get_facility_context_data(**kwargs)
+        logger.debug(f'get_facility_context_data -- kwargs: {kwargs}')
         new_context_data = {
-            'version': __version__  # from tom_swift/__init__.py
+            'version': __version__,  # from tom_swift/__init__.py
+            'username': self.swift_api.username,
         }
-        facility_context_data.update(new_context_data)
+        target = kwargs['target']
+        new_context_data['resolved_target_name'] = self.swift_api.resolve_target(target)
 
+        facility_context_data.update(new_context_data)
         return facility_context_data
 
     def get_form(self, observation_type):
