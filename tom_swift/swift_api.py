@@ -1,8 +1,58 @@
-#
 # This module is intended to hold the Swift ToO API specific information
 # see https://www.swift.psu.edu/too_api/  for documentation
 # see https://gitlab.com/DrPhilEvans/swifttools  for source code
 #
+import logging
+
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+
+from astropy.coordinates import SkyCoord
+from swifttools.swift_too import TOO, Resolve
+from swifttools.swift_too.api_resolve import Swift_Resolve
+from tom_targets.models import Target
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+class SwiftAPI(TOO):
+    """Extend the swifttools.swift_too.TOO class with some properties and
+    API client-type methods.
+    """
+    def __init__(self, debug=True):
+        self.debug = debug
+        # gather username
+        try:
+            self.username = settings.FACILITIES['SWIFT'].get('SWIFT_USERNAME', 'SWIFT_USERNAME not configured')
+            self.shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_PASSWORD', 'SWIFT_PASSWORD not configured')
+            logger.debug(f'swift username: {self.username}')
+        except KeyError as ex:
+            logger.error(f"'SWIFT' configuration dictionary not defined in settings.FACILITIES")
+            raise ImproperlyConfigured
+
+
+    def resolve_target(self, target: Target):
+        """
+        """
+        logger.debug(f'resolve_target: {target.name}')
+
+        resolved_target: Swift_Resolve = Resolve(target.name)  # this calls the API
+        # <class 'swifttools.swift_too.api_resolve.Swift_Resolve'>
+
+        logger.debug(f'resolved_target: {resolved_target}')
+        logger.debug(f'type(resolved_target): {type(resolved_target)}')
+        logger.debug(f'dir(resolved_target): {dir(resolved_target)}')
+        for key, value in resolved_target.__dict__.items():
+            logger.debug(f'resolved_target.{key}): {value}')
+
+        return resolved_target
+
+
+    def get_observation_type_choices(self):
+        """
+        """
+        logger.debug(f'get_observation_type_choices')
+        pass
 
 #
 # Urgency
@@ -60,7 +110,7 @@ SWIFT_XRT_MODE_CHOICES = {
 
 
 #
-# Observation Type
+# Observation Types
 #
 # Note that: 
 # >>> TOO().obs_types

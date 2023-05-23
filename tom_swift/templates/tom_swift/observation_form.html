@@ -24,8 +24,15 @@
     <div class="col-md-4">
         <h4>Target Information</h4>
         {% target_data target %}
-        <h4>Target Name Resolution</h4>
-        <p>The Target was resolved to be: {{ resolved_target_name }}.</p>
+        <h4>Resolved Target Information ({{ resolver }})</h4>
+        <dl class="row">
+            <dt class="col-sm-6">Resolved Name</dt>
+            <dd class="col-sm-6">{{ resolved_target_name }}</dd>
+            <dt class="col-sm-6">Right Ascension</dt>
+            <dd class="col-sm-6">{{ resolved_target_ra }}</dd>
+            <dt class="col-sm-6">Declination</dt>
+            <dd class="col-sm-6">{{ resolved_target_dec }}</dd>
+        </dl>
     </div>
 
     <div class="col-md-6">

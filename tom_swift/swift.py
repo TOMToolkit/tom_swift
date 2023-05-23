@@ -1,9 +1,18 @@
-from crispy_forms.layout import Layout, Div, Row
+import logging
+
+from crispy_forms.layout import Layout, Div, Row, HTML
 
 from django import forms
 from django.conf import settings
 
-from tom_observations.facility import BaseRoboticObservationForm, BaseRoboticObservationFacility
+from tom_observations.facility import BaseObservationForm, BaseObservationFacility
+
+from tom_swift import __version__
+from tom_swift.swift_api import SwiftAPI
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 class SwiftObservationForm(BaseObservationForm):
     # TODO: cannot user BaseRoboticObservationForm b/c it assumes
@@ -54,7 +63,11 @@ class SwiftFacility:
             'username': self.swift_api.username,
         }
         target = kwargs['target']
-        new_context_data['resolved_target_name'] = self.swift_api.resolve_target(target)
+        resolved_target = self.swift_api.resolve_target(target)
+        new_context_data['resolver'] = resolved_target.resolver
+        new_context_data['resolved_target_name'] = resolved_target.name
+        new_context_data['resolved_target_ra'] = resolved_target.ra
+        new_context_data['resolved_target_dec'] = resolved_target.dec
 
         facility_context_data.update(new_context_data)
         return facility_context_data
