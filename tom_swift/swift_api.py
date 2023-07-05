@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 from astropy.coordinates import SkyCoord
+from requests.exceptions import ConnectionError
 from swifttools.swift_too import TOO, Resolve
 from swifttools.swift_too.api_resolve import Swift_Resolve
 from tom_targets.models import Target
@@ -36,14 +37,19 @@ class SwiftAPI(TOO):
         """
         logger.debug(f'resolve_target: {target.name}')
 
-        resolved_target: Swift_Resolve = Resolve(target.name)  # this calls the API
-        # <class 'swifttools.swift_too.api_resolve.Swift_Resolve'>
+        try:
+            resolved_target: Swift_Resolve = Resolve(target.name)  # this calls the API
+            # <class 'swifttools.swift_too.api_resolve.Swift_Resolve'>
+        except ConnectionError as err:
+            logger.error(f'ConnectionError: {err}')
+            resolved_target = None
 
         logger.debug(f'resolved_target: {resolved_target}')
         logger.debug(f'type(resolved_target): {type(resolved_target)}')
         logger.debug(f'dir(resolved_target): {dir(resolved_target)}')
-        for key, value in resolved_target.__dict__.items():
-            logger.debug(f'resolved_target.{key}): {value}')
+        if resolved_target is not None:
+            for key, value in resolved_target.__dict__.items():
+                logger.debug(f'resolved_target.{key}): {value}')
 
         return resolved_target
 
@@ -54,15 +60,32 @@ class SwiftAPI(TOO):
         logger.debug(f'get_observation_type_choices')
         pass
 
+
+
+SWIFT_TARGET_CLASSIFICATION_CHOICES = [
+    'AGN',
+    'Be Binary System',
+    'Comet or Asteroid',
+    'Dwarf Nova',
+    'GRB',
+    'Nova',
+    'Pulsar',
+    'Supernova',
+    'Tidal Disruption Event',
+    'X-Ray Transient',
+    'Other (please specify)',
+]
+
+
 #
 # Urgency
 #
-SWIFT_URGENCY_CHOICES = {
-    1 : 'Within 4 hours',
-    2 : 'Within 24 hours',
-    3 : 'Days to a week', # default
-    4 : 'Week to a month',
-}
+SWIFT_URGENCY_CHOICES = [
+    (1, 'Within 4 hours (Wakes up the Swift Observatory Duty Scientist).'),
+    (2, 'Within 24 hours'),
+    (3, 'Days to a week'), # default
+    (4, 'Week to a month'),
+]
 
 #
 # Instruments
@@ -115,3 +138,10 @@ SWIFT_XRT_MODE_CHOICES = {
 # Note that: 
 # >>> TOO().obs_types
 # ['Spectroscopy', 'Light Curve', 'Position', 'Timing']
+SWIFT_OBSERVATION_TYPE_CHOICES = [
+    ('Spectroscopy', 'Spectroscopy'),
+    ('Light Curve', 'Light Curve'),
+    ('Position', 'Position'),
+    ('Timing', 'Timing'),
+]
+

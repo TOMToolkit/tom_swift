@@ -7,10 +7,8 @@
 {% endblock %}
 {% block content %}
 {{ form|as_crispy_errors }}
-<h1>Neil Gehrels Swift Observatory</h1>
-<p><em>TOM Toolit Facility (<a href="https://github.com/TOMToolkit/tom_swift">tom_swift</a>) version {{ version }}</em></p>
-<h3>Submit an observation to {{ form.facility.value }}</h3>
-<p><em>Submitting credential: {{ username }}</em></p>
+<h1>Submit Request to Neil Gehrels Swift Observatory</h1>
+
 
 {% if target.type == 'SIDEREAL' %}
 <div class="row">
@@ -21,9 +19,13 @@
 {% endif %}
 
 <div class="row">
+    <!-- Column 1 -->
     <div class="col-md-4">
+        <p><b>Submitting credential:</b> <em>{{ username }}</em></p>
+        <hr>
         <h4>Target Information</h4>
         {% target_data target %}
+        <hr>
         <h4>Resolved Target Information ({{ resolver }})</h4>
         <dl class="row">
             <dt class="col-sm-6">Resolved Name</dt>
@@ -33,8 +35,11 @@
             <dt class="col-sm-6">Declination</dt>
             <dd class="col-sm-6">{{ resolved_target_dec }}</dd>
         </dl>
+        <hr>
+        <!-- display tom_swift Facility verison -->
+        <p><em>TOM Toolit Facility (<a href="https://github.com/TOMToolkit/tom_swift">tom_swift</a>) version {{ version }}</em></p>
     </div>
-
+    <!-- Column 2 -->
     <div class="col-md-6">
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" id="tabs">
