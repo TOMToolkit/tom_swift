@@ -31,9 +31,9 @@
             <dt class="col-sm-6">Resolved Name</dt>
             <dd class="col-sm-6">{{ resolved_target_name }}</dd>
             <dt class="col-sm-6">Right Ascension</dt>
-            <dd class="col-sm-6">{{ resolved_target_ra }}</dd>
+            <dd class="col-sm-6">{{ resolved_target_ra|floatformat:4 }}</dd>
             <dt class="col-sm-6">Declination</dt>
-            <dd class="col-sm-6">{{ resolved_target_dec }}</dd>
+            <dd class="col-sm-6">{{ resolved_target_dec|floatformat:4 }}</dd>
         </dl>
         <hr>
         <!-- display tom_swift Facility verison -->
