@@ -317,22 +317,211 @@ class SwiftFacility(BaseObservationFacility):
         raise NotImplementedError('SwiftFacility.get_terminal_observing_states not yet implemented')
 
 
-    def validate_observation(self, observation_payload):
+    def _configure_too(self, observation_payload):
+        """In preparation for calls to self.swift_api.too.validate() and self.swift_api.too.submit(),
+        both validate_observation() and submit_observation() call this method to
+        configure the Swift_TOO object (self.too) from the observation_payload.
+
+        For this Facility, the observation_payload is the serialized form.cleaned_data
+        plus the target information (which doesn't come from the form).
+        See SwiftObservationForm.observation_payload() for details.
+
+        Reference Documentation:
+         * https://www.swift.psu.edu/too_api/
+         * https://www.swift.psu.edu/too_api/index.php?md=TOO parameters.md
+        """
+        #logger.debug(f'_configure_too - observation_payload: {observation_payload}')
+        #for key, value in observation_payload.items():
+        #    logger.debug(f'_configure_too -- observation_payload.{key}: {value}')
+
+
+        # User information (this should already be configured in the SwiftAPI.__init__())
+        logger.debug(f'_configure_too - self.swift_api.too.username: {self.swift_api.too.username}')
+        logger.debug(f'_configure_too - self.swift_api.too.shared_secret: {self.swift_api.too.shared_secret}')
+
+        # Object Information
+        self.swift_api.too.source_name = observation_payload['source_name']
+        self.swift_api.too.ra = observation_payload['ra']
+        self.swift_api.too.dec = observation_payload['dec']
+
+        # Type or Classification
+        self.swift_api.too.source_type = observation_payload['target_classification']
+
+        # What is driving the exposure time?
+        self.swift_api.too.obs_type = observation_payload['obs_type']
+
+        # TODO: Tiling Support
+        # Tiling (yes/no)
+        # if yes, then
+        #   Number of Tiles; Exposure Time per Tile; Tiling Justification
+
+        # Immediate Objective
+        self.swift_api.too.immediate_objective = observation_payload['immediate_objective']
+
+        # TODO: Guest InvestigatorI Program Support
+        # Are you triggering a GI program? (yes/no)
+        # if yes, then
+        #   GI Program Details: Proposal ID; Proposal PI; Trigger Justification
+        # Since "this will count against the number of awarded triggers", show
+        # triggers used / total number triggers awarded. (and trigger remaining?)..
+
+        # Instrument (XRT/UVOT/BAT)
+        # TODO: plumb this through to the form
+        self.swift_api.too.instrument = "XRT"
+
+        # XRT Mode
+        # TODO: Auto; Windowed Timing; Photon Counting;
+        self.swift_api.too.xrt_mode = "WT" # observation_payload['xrt_mode']
+        self.swift_api.too.xrt_countrate = 20.0 # observation_payload['xrt_countrate']  # counts/second
+
+        # UVOT Mode
+        self.swift_api.too.uvot_mode = observation_payload['uvot_mode']
+        self.swift_api.too.uvot_just = observation_payload['uvot_just']
+
+        # Ugency
+        self.swift_api.too.urgency = observation_payload['urgency']
+
+        # Object Brightness
+        self.swift_api.too.optical_magnitude = observation_payload['optical_magnitude']
+        self.swift_api.too.optical_filter = observation_payload['optical_filter']
+        #self.swift_api.too.xrt_countrate = observation_payload['xrt_countrate']  # counts/second
+        #self.swift_api.too.bat_countrate = observation_payload['bat_countrate']  # counts/second
+        #self.swift_api.too.other_brightness = observation_payload['other_brightness']
+
+        # Science Justification
+        self.swift_api.too.science_just = observation_payload['science_just']
+
+        # Observation Strategy
+        # Single Observation / Multiple Observations
+        self.swift_api.too.exposure = observation_payload['exposure']
+        self.swift_api.too.exp_time_just = observation_payload['exp_time_just']
+        # if Multiple Observations, then Monitoring Details
+        #    Number of Visits; Exposure Time per Visit; Monitoring Cadence Number + Units
+        multiple_observations = False  # TODO: plumb this through to the form
+        if multiple_observations:
+            self.swift_api.too.num_of_visits = observation_payload['num_of_visits']
+            self.swift_api.too.exp_time_per_visit = observation_payload['exp_time_per_visit']
+            self.swift_api.too.monitoring_freq = observation_payload['monitoring_freq']
+        # TODO: Units for monitoring_freq (days, hours, minutes, seconds, orbits, others, etc.)
+
+        # Debug
+        self.swift_api.too.debug = True   # TODO: plumb this through to the form
+
+
+
+
+    def validate_observation(self, observation_payload) -> [()]:
         """Perform a dry-run of submitting the observation.
 
-        see submit_observation()
+        See submit_observation() for details.
 
         The super class method is absract. No need to call it.
         """
-        logger.debug(f'validate_observation - observation_payload: {observation_payload}')
+        self._configure_too(observation_payload)
 
-    def submit_observation(self, observation_payload):
+        validation_errors = []
+        # first, validate the too locally
+        too_is_valid = self.swift_api.too.validate()
+        logger.debug(f'validate_observation response: {too_is_valid}')
+
+        if too_is_valid:
+            # if the too was internally valid, now validate with the server
+            logger.debug(f'validate_observation - calling too.server_validate()')
+            too_is_server_valid = self.swift_api.too.server_validate()
+        
+        logger.debug(f'validate_observation - too.status: {self.swift_api.too.status}')
+        #logger.debug(f'validate_observation - dir(too.status): {dir(self.swift_api.too.status)}')
+
+        too_status_properties_removed = [
+            'clear', 'submit', 'jwt', 'queue',
+            'error', 'warning', 'validate',
+        ]
+        too_status_properties = ['api_data', 'api_name', 'api_version', 'began',
+                                 'complete', 'completed', 'errors', 'fetchresult',
+                                 'ignorekeys', 'jobnumber', 'result', 'shared_secret',
+                                 'status', 'submit_url', 'timeout', 'timestamp',
+                                 'too_api_dict', 'too_id', 'username', 'warnings']
+        
+        for property in too_status_properties:
+            logger.debug(f'validate_observation - too.status.{property}: {getattr(self.swift_api.too.status, property)}')
+
+        if not (too_is_valid and too_is_server_valid):
+            # TODO: extract the error messages from the response
+            # the too.status.errors is a list of strings. for example: ['Missing key: exp_time_just']
+            logger.debug(f'validate_observation - too.status.status: {self.swift_api.too.status.status}')
+            logger.debug(f'validate_observation - too.status.errors: {self.swift_api.too.status.errors}')
+            logger.debug(f'validate_observation - type(too.status.errors): {type(self.swift_api.too.status.errors)}')
+            
+            # this assumes the format of the error message, which is not correct
+            #for error_string in self.swift_api.too.status.errors:
+            #    field = error_string.split(':')[1].strip()
+            #    error = error_string.split(':')[0].strip()
+            #    validation_errors.append((field, error))
+
+            validation_errors = self.swift_api.too.status.errors
+
+        return validation_errors
+
+    def submit_observation(self, observation_payload) -> [()]:
         """Submit the observation to the Swift ToO API
 
-        `observation_payload` is the serialized form data.
+        `observation_payload` is the serialized form.cleaned_data
+
+        For the SwiftFacility, sumbitting (or validating) an observation request means
+        instanciating a Swift_TOO object, setting it properties from the observation_payload,
+        and calling its submit() (or validate()) method. self.too is the Swift_TOO object, whose
+        proerties we need to set.
+
+        returns a list of (field, error) tuples if the observation is invalid
+
+        See https://www.swift.psu.edu/too_api/ for documentation. 
 
         The super class method is absract. No need to call it.
          """
-        logger.debug(f'submit_observation - observation_payload: {observation_payload}')
+        self._configure_too(observation_payload)
+        self.swift_api.too.submit()
+
+        logger.info(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
+        logger.info(f'submit_observation - too.status.errors: {self.swift_api.too.status.errors}')
+
+        logger.debug(f'submit_observation - too.status: {self.swift_api.too.status}')
+
+        #too_status_properties_removed = [
+        #    'clear', 'submit', 'jwt', 'queue',
+        #    'error', 'warning', 'validate',
+        #]
+        #too_status_properties = ['api_data', 'api_name', 'api_version', 'began',
+        #                         'complete', 'completed', 'errors', 'fetchresult',
+        #                         'ignorekeys', 'jobnumber', 'result', 'shared_secret',
+        #                         'status', 'submit_url', 'timeout', 'timestamp',
+        #                         'too_api_dict', 'too_id', 'username', 'warnings']
+        #
+        #for property in too_status_properties:
+        #    logger.debug(f'submit_observation - too.status.{property}: {getattr(self.swift_api.too.status, property)}')
+
+        if self.swift_api.too.status.status == 'Accepted':
+            # this was a successful submission
+            logger.info(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
+            logger.info(f'submit_observation - too.status.too_id: {self.swift_api.too.status.too_id}')
+
+            # lets examine the TOO created
+            # TODO: move this code into swift_api.py
+            # see https://www.swift.psu.edu/too_api/index.php?md=Swift TOO Request Example Notebook.ipynb
+
+            # configure the request object
+            self.swift_api.too_request.username = self.swift_api.too.username
+            self.swift_api.too_request.shared_secret = self.swift_api.too.shared_secret
+            self.swift_api.too_request.detail = True
+            self.swift_api.too_request.too_id = self.swift_api.too.status.too_id
+            too_request_response = self.swift_api.too_request.submit()
+
+            if too_request_response:
+                logger.debug(f'submit_observation - too_request[0]: {self.swift_api.too_request[0]}')
+            else:
+                logger.error(f'submit_observation - too_request_response: {too_request_response}')
+        else:
+            logger.error(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
+
+        return []
 
 
