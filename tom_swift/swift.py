@@ -43,17 +43,17 @@ class ListTextWidget(forms.TextInput):
 
 
 class SwiftObservationForm(BaseObservationForm):
-    # TODO: cannot user BaseRoboticObservationForm b/c it assumes
-    #   (in tom_observations/templatetags/observation_extras.py::L#110 get_sidereal_visibility)
-    #   that the Facility has a fixed Lat/Lon, lol. 
-
-#    # TODO: re-consider (or remove?) assumption that all Layout instances have a group property
-#    #  (see tom_observations.view,py::get_form::L#255 and other layout methods of other facility forms)
-#    if settings.TARGET_PERMISSIONS_ONLY:
-#        groups = Div()
-#    else:
-#        groups = Row('groups')
-#
+    #  TODO: re-consider (or remove?) assumption that all Layout instances have a group property
+    #        (see tom_observations.view,py::get_form::L#255 and other layout methods of other
+    #         facility forms):
+    #            if settings.TARGET_PERMISSIONS_ONLY:
+    #                groups = Div()
+    #            else:
+    #                groups = Row('groups')
+    #
+    # TODO: see www.swift.psu.edu/toop/toorequest.php of the NASA/PSU Swift ToO Request Form
+    # TODO: support "GI Program" requests
+    #
 
     urgency = forms.ChoiceField(
         required=True,
