@@ -63,15 +63,17 @@ class SwiftObservationForm(BaseObservationForm):
 
     target_classification = forms.CharField(
         required=True,
-        label='Target Classification',
+        label='Target Type or Classification',
         help_text=(
-            'Target type or classification. '
+            'Target Type or Classification. '
             'Focus, clear, and click to select from choices or enter a custom value.'),
         # custom widget to allow user to enter a custom value or select from a choices
+        # TODO: Create drop down with Other menu item which when selected shows a text box
+        #       for the user to enter a custom value.
         widget=ListTextWidget(data_list=SWIFT_TARGET_CLASSIFICATION_CHOICES,
                               name='target-classification'))
 
-    swift_observation_type = forms.ChoiceField(
+    obs_type = forms.ChoiceField(
         required=True,
         label='Observation Type',
         choices=SWIFT_OBSERVATION_TYPE_CHOICES,
@@ -80,8 +82,10 @@ class SwiftObservationForm(BaseObservationForm):
 
     optical_magnitude = forms.FloatField(required=False, label='Optical Magnitude')
     optical_filter = forms.CharField(required=False, label='What filter was this measured in?',initial='u')
-    exposure_time = forms.FloatField(required=False, label='Exposure time requested [s]',initial=500)
-    exp_time_just = forms.CharField(required=False, label='Time Justification', initial="500s to determine if source has faded")
+    exposure = forms.FloatField(required=False, label='Exposure time requested [s]',initial=500)
+    exp_time_just = forms.CharField(
+        required=False, label='Time Justification',
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
 
     num_of_visits= forms.IntegerField(
         required=False,
@@ -93,11 +97,24 @@ class SwiftObservationForm(BaseObservationForm):
     monitoring_freq = forms.CharField(required=False, label='Frequency of visits')
     exp_time_per_visit = forms.FloatField(required=False, label='Exposure time per visit(s) [s]')
 
-    uvot_mode = forms.CharField(required=False, label='UVOT filter mode (can write instructions or specific mode)', initial='0x01AB')
-    uvot_just = forms.CharField(required=False, label='UVOT Mode Justification', initial="Needs to be revised, do we want default as u or all filters?")
+    uvot_mode = forms.CharField(
+        required=False,
+        label='UVOT filter mode (can write instructions or specific mode)',
+        initial='0x9999') # 0x9999 is the "Filter of the Day" and does not require justification
 
-    science_just = forms.CharField(required=False, label='Science Justification', initial="500s to determine if source has faded")
-    immediate_objective = forms.CharField(required=False, label='Immediate Objective',initial="To determine if source has faded.")
+    # required unless uvot_mode is 0x9999 (Filter of the Day)
+    uvot_just = forms.CharField(
+        required=False, label='UVOT Mode Justification',
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+
+    science_just = forms.CharField(
+        required=False, label='Science Justification',
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+
+    immediate_objective = forms.CharField(
+        required=False, label='Immediate Objective',
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+
 
     def layout(self):
         layout = Layout(
@@ -108,10 +125,10 @@ class SwiftObservationForm(BaseObservationForm):
             Accordion(
                 AccordionGroup('Observation/Exposure Information',
                     Div(
-                        'swift_observation_type',
+                        'obs_type',
                         'optical_magnitude',
                         'optical_filter',
-                        'exposure_time',
+                        'exposure',
                         'exp_time_just',
                     ),
                     Div(
