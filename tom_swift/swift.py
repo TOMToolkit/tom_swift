@@ -273,25 +273,32 @@ class SwiftFacility(BaseObservationFacility):
     def all_data_products(self, observation_record):
         data_products = super().all_data_products(observation_record)
         logger.debug('all_data_products: {data_products}}')
+        raise NotImplementedError('SwiftFacility.all_data_products not yet implemented')
         return data_products
 
     def data_products(self, observation_id, product_id):
         # TODO: this is from the BaseRoboticObservationFacility class 
         #       not sure if it's needed here
         logger.debug('data_products')
+        raise NotImplementedError('SwiftFacility.data_products not yet implemented')
 
     def get_observation_status(self):
         logger.debug('get_observation_status')
+        raise NotImplementedError('SwiftFacility.get_observation_status not yet implemented')
 
     def get_observation_url(self):
         logger.debug('get_observation_url')
+        raise NotImplementedError('SwiftFacility.get_observation_url not yet implemented')
 
     def get_observing_sites(self):
         logger.debug('get_observing_sites')
+        raise NotImplementedError('SwiftFacility.get_observing_sites not yet implemented')
         return super().get_observing_sites()
 
     def get_terminal_observing_states(self):
         logger.debug('get_terminal_observing_states')
+        raise NotImplementedError('SwiftFacility.get_terminal_observing_states not yet implemented')
+
 
     def validate_observation(self, observation_payload):
         """Perform a dry-run of submitting the observation.
