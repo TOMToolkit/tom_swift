@@ -54,6 +54,7 @@ class SwiftObservationForm(BaseObservationForm):
     # TODO: see www.swift.psu.edu/toop/toorequest.php of the NASA/PSU Swift ToO Request Form
     # TODO: support "GI Program" requests
     #
+    debug = forms.BooleanField(required=False, label='Debug', initial=True)
 
     urgency = forms.ChoiceField(
         required=True,
@@ -144,6 +145,7 @@ class SwiftObservationForm(BaseObservationForm):
                     ),
                 ),
             ),
+            'debug'
         ) # end layout
 
 #            Layout(
@@ -336,6 +338,10 @@ class SwiftFacility(BaseObservationFacility):
         logger.debug(f'_configure_too - self.swift_api.too.username: {self.swift_api.too.username}')
         logger.debug(f'_configure_too - self.swift_api.too.shared_secret: {self.swift_api.too.shared_secret}')
 
+        # Information about the request
+        # (the username and shared_secret are already configured in the SwiftAPI.__init__())
+        self.swift_api.too.debug = observation_payload['debug']
+
         # Object Information
         self.swift_api.too.source_name = observation_payload['source_name']
         self.swift_api.too.ra = observation_payload['ra']
@@ -400,11 +406,6 @@ class SwiftFacility(BaseObservationFacility):
             self.swift_api.too.exp_time_per_visit = observation_payload['exp_time_per_visit']
             self.swift_api.too.monitoring_freq = observation_payload['monitoring_freq']
         # TODO: Units for monitoring_freq (days, hours, minutes, seconds, orbits, others, etc.)
-
-        # Debug
-        self.swift_api.too.debug = True   # TODO: plumb this through to the form
-
-
 
 
     def validate_observation(self, observation_payload) -> [()]:
@@ -476,6 +477,16 @@ class SwiftFacility(BaseObservationFacility):
         The super class method is absract. No need to call it.
          """
         self._configure_too(observation_payload)
+
+        # TODO: remove this for production
+        if not self.swift_api.too.debug:
+            # while in development, exit early if we're not in debug mode. (i.e. don't submit).
+            logger.warning(f'submit_observation - Skipping ACTUAL submission!!! too.debug: {self.swift_api.too.debug}'
+                           f'Even though, in the form Debug is {self.swift_api.too.debug}, it is being reset'
+                           f'too True before we call too.submit()')
+            self.swift_api.too.debug = True
+            return []
+
         self.swift_api.too.submit()
 
         logger.info(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')

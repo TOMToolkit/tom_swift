@@ -33,7 +33,6 @@ class SwiftAPI:
     def __init__(self, debug=True):
         self.too = TOO()
         self.too_request = TOORequests()
-        self.too.debug = debug
 
         # gather username
         try:
