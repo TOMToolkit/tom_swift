@@ -249,13 +249,10 @@ class SwiftFacility(BaseObservationFacility):
         ('OBSERVATION', 'Custom Observation')
     ]
 
-    # observation_forms key-values become TABs in the observation_form template
     observation_forms = {
-        # TODO: this should be driven by swift_api.SWIFT_INSTRUMENT_CHOICES
-        'UVOT': SwiftUVOTObservationForm,
-        'XRT': SwiftXRTObservationForm,
-        'BAT': SwiftBATObservationForm,
+        'Swift TOO Observation': SwiftObservationForm,
     }
+
     template_name = 'tom_swift/observation_form.html'
 
     def get_facility_context_data(self, **kwargs):
