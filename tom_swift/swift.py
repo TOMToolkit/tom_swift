@@ -5,7 +5,8 @@ from crispy_forms.bootstrap import Accordion, AccordionGroup
 from django import forms
 from django.conf import settings
 
-from tom_observations.facility import BaseObservationForm, BaseObservationFacility
+from tom_observations.facility import BaseObservationForm, BaseObservationFacility, get_service_class
+from tom_targets.models import Target
 
 from tom_swift import __version__
 from tom_swift.swift_api import (SwiftAPI,
@@ -144,6 +145,66 @@ class SwiftObservationForm(BaseObservationForm):
 #            'science_just',
 #        )
         return layout
+
+    def is_valid(self):
+        """Validate the form
+
+        This method is called by the view's form_valid() method.
+        """
+        # TODO: check validity of doc-string
+        super().is_valid() # this adds cleaned_data to the form instance
+        logger.debug(f'SwiftObservationForm.is_valid -- cleaned_data: {self.cleaned_data}')
+
+        observation_payload = self.observation_payload()
+        logger.debug(f'SwiftObservationForm.is_valid -- observation_payload: {observation_payload}')
+
+        # BaseObservationForm.is_valid() says to make this call the Facility.validate_observation() method
+        observation_module = get_service_class(self.cleaned_data['facility'])
+
+        # validate_observation needs to return a list of (field, error) tuples
+        # if the list is empty, then the observation is valid
+        #
+        # in order to call self.add_error(field, error), the field given must match the
+        # a field declared on the Form, Thus, the form field names must match the properties
+        # of the swifttoolkit.Swift_TOO object (unless we want to maintain a a mapping between
+        # the two).
+        #
+        logger.debug(f'SwiftObservationForm.is_valid -- fields: {self.fields.keys()}')
+        errors: [] = observation_module().validate_observation(observation_payload)
+
+        if errors:
+            self.add_error(None, errors)
+            logger.debug(f'SwiftObservationForm.is_valid -- errors: {errors}')
+
+        if self._errors:
+            logger.warn(f'Facility submission has errors {self._errors.as_data()}')
+
+        # if add_error has not been called, then a success message will be displayed in the template
+        return not self._errors
+
+    def observation_payload(self):
+        """Transform the form.cleaned_data into a payload dictionary that can be:
+           A. validated (see) SwiftFacility.validate_observation(); and
+           B. submitted (see) SwiftFacility.submit_observation()
+
+        For other facilities, observation_payload() transforms the form.cleaned_data
+        into something that can be more directly submitted to the facility's API
+        (via the Facility's validate_observation() and submit_observation() methods).
+
+        For Swift, since we're configuring a Swift_TOO object, the form.cleaned_data
+        plus the target information should be sufficient.
+        """
+        # At the moment it's unclear why the obeervation_payload needs to differ from
+        # the form.cleaned_data...
+        payload = self.cleaned_data.copy() # copy() just to be safe
+
+        # ...but we need to add the target information (which doesn't come from the form).
+        target = Target.objects.get(pk=self.cleaned_data['target_id'])
+        payload['source_name'] = target.name
+        payload['ra'] = target.ra
+        payload['dec'] = target.dec
+
+        return payload
 
 class SwiftUVOTObservationForm(SwiftObservationForm):
     """Extends the SwiftObservationForm with UVOT-specific fields
