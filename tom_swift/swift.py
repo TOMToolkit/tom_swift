@@ -190,7 +190,7 @@ class SwiftFacility(BaseObservationFacility):
         logger.debug(f'get_facility_context_data -- kwargs: {kwargs}')
         new_context_data = {
             'version': __version__,  # from tom_swift/__init__.py
-            'username': self.swift_api.username,
+            'username': self.swift_api.too.username,
         }
         target = kwargs['target']
         resolved_target = self.swift_api.resolve_target(target)

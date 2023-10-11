@@ -1,7 +1,13 @@
-# This module is intended to hold the Swift ToO API specific information
-# see https://www.swift.psu.edu/too_api/  for documentation
-# see https://gitlab.com/DrPhilEvans/swifttools  for source code
-#
+"""This module is intended to hold the Swift ToO API specific information
+- see https://www.swift.psu.edu/too_api/  for documentation
+- see https://gitlab.com/DrPhilEvans/swifttools  for source code
+
+Notes:
+  - swifttools.swift_too.TOO and swifttools.swift_too.Swift_TOO are both
+    <class 'swifttools.swift_too.swift_toorequest.Swift_TOORequest'>
+  - more
+  - more notes
+"""
 import logging
 
 from django.conf import settings
@@ -9,24 +15,32 @@ from django.core.exceptions import ImproperlyConfigured
 
 from astropy.coordinates import SkyCoord
 from requests.exceptions import ConnectionError
-from swifttools.swift_too import TOO, Resolve
+
+from swifttools.swift_too import TOO, TOORequests, Resolve
 from swifttools.swift_too.api_resolve import Swift_Resolve
+
 from tom_targets.models import Target
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
-class SwiftAPI(TOO):
-    """Extend the swifttools.swift_too.TOO class with some properties and
-    API client-type methods.
+class SwiftAPI:
+    """This is the interface between the SwiftFacility and the swifttools.swift_too classes.
+
+    This keeps the SwiftFacility class focued on implementing it's super class methods and separates
+    the SwiftFacility from the swifttools.swift_too classes.
     """
     def __init__(self, debug=True):
-        self.debug = debug
+        self.too = TOO()
+        self.too_request = TOORequests()
+        self.too.debug = debug
+
         # gather username
         try:
-            self.username = settings.FACILITIES['SWIFT'].get('SWIFT_USERNAME', 'SWIFT_USERNAME not configured')
-            self.shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_PASSWORD', 'SWIFT_PASSWORD not configured')
-            logger.debug(f'swift username: {self.username}')
+            self.too.username = settings.FACILITIES['SWIFT'].get('SWIFT_USERNAME', 'SWIFT_USERNAME not configured')
+            self.too.shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_PASSWORD', 'SWIFT_PASSWORD not configured')
+
+            logger.info(f'swift username: {self.too.username}')
         except KeyError as ex:
             logger.error(f"'SWIFT' configuration dictionary not defined in settings.FACILITIES")
             raise ImproperlyConfigured
@@ -35,7 +49,7 @@ class SwiftAPI(TOO):
     def resolve_target(self, target: Target):
         """
         """
-        logger.debug(f'resolve_target: {target.name}')
+        logger.info(f'resolve_target: {target.name}')
 
         try:
             resolved_target: Swift_Resolve = Resolve(target.name)  # this calls the API
@@ -44,7 +58,7 @@ class SwiftAPI(TOO):
             logger.error(f'ConnectionError: {err}')
             resolved_target = None
 
-        logger.debug(f'resolved_target: {resolved_target}')
+        logger.info(f'resolved_target: {resolved_target}')
         logger.debug(f'type(resolved_target): {type(resolved_target)}')
         logger.debug(f'dir(resolved_target): {dir(resolved_target)}')
         if resolved_target is not None:
