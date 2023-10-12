@@ -329,8 +329,14 @@ class SwiftFacility(BaseObservationFacility):
         self.swift_api.too.ra = observation_payload['ra']
         self.swift_api.too.dec = observation_payload['dec']
 
-        # Type or Classification
-        self.swift_api.too.source_type = observation_payload['target_classification']
+        # Target Type or Classification
+        # decide which field to use based on the value of target_classification_choices
+        if observation_payload['target_classification_choices'] == 'Other (please specify)':
+            # they specified a custom target classification. use that.
+            self.swift_api.too.source_type = observation_payload['target_classification']
+        else:
+            # use the value from the drop-down menu
+            self.swift_api.too.source_type = observation_payload['target_classification_choices']
 
         # What is driving the exposure time?
         self.swift_api.too.obs_type = observation_payload['obs_type']
