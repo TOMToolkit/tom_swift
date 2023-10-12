@@ -67,14 +67,6 @@ class SwiftAPI:
         return resolved_target
 
 
-    def get_observation_type_choices(self):
-        """
-        """
-        logger.debug(f'get_observation_type_choices')
-        pass
-
-
-
 SWIFT_TARGET_CLASSIFICATION_CHOICES = [
     ('AGN', 'AGN'),
     ('Be Binary System', 'Be Binary System'),
