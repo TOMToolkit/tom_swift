@@ -10,37 +10,13 @@ from tom_targets.models import Target
 
 from tom_swift import __version__
 from tom_swift.swift_api import (SwiftAPI,
+                                 SWIFT_INSTRUMENT_CHOICES,
                                  SWIFT_OBSERVATION_TYPE_CHOICES,
                                  SWIFT_TARGET_CLASSIFICATION_CHOICES,
                                  SWIFT_URGENCY_CHOICES)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-
-class ListTextWidget(forms.TextInput):
-    """A widget that supplies a list of options for a text input field, but
-    also allows the user to enter a custom value.
-
-    Used here for the target_classification field of the SwiftObservationForm.
-    """
-    def __init__(self, data_list, name, *args, **kwargs):
-        super(ListTextWidget, self).__init__(*args, **kwargs)
-        self._name = name
-        self._list = data_list
-        self.attrs.update({'list':'list__%s' % self._name})
-
-    def render(self, name, value, attrs=None, renderer=None):
-        text_html = super(ListTextWidget, self).render(name, value, attrs=attrs)
-        data_list = '<datalist id="list__%s">' % self._name
-        for item in self._list:
-            data_list += '<option value="%s">' % item
-        data_list += '</datalist>'
-
-        return (text_html + data_list)
-
-
-
 
 class SwiftObservationForm(BaseObservationForm):
     #  TODO: re-consider (or remove?) assumption that all Layout instances have a group property
@@ -62,17 +38,20 @@ class SwiftObservationForm(BaseObservationForm):
         choices=SWIFT_URGENCY_CHOICES,
         initial=SWIFT_URGENCY_CHOICES[2])
 
-    target_classification = forms.CharField(
+    # see tom_swift/templates/tom_swift/observation_form.html for javascript
+    # that displays/hides the target_classification ChoiceField if "Other (please specify)""
+    # is chosen in the target_classification_choices drop-down menu widget.
+    target_classification_choices = forms.ChoiceField(
         required=True,
         label='Target Type or Classification',
-        help_text=(
-            'Target Type or Classification. '
-            'Focus, clear, and click to select from choices or enter a custom value.'),
-        # custom widget to allow user to enter a custom value or select from a choices
-        # TODO: Create drop down with Other menu item which when selected shows a text box
-        #       for the user to enter a custom value.
-        widget=ListTextWidget(data_list=SWIFT_TARGET_CLASSIFICATION_CHOICES,
-                              name='target-classification'))
+        choices=SWIFT_TARGET_CLASSIFICATION_CHOICES,
+        initial=SWIFT_TARGET_CLASSIFICATION_CHOICES[0]
+    )
+    target_classification = forms.CharField(
+        required=False, label=False,
+        initial='please specify other target classification'
+    )
+    # TODO: get the correct value into the too in SwiftFacility._configure_too()
 
     obs_type = forms.ChoiceField(
         required=True,
@@ -120,7 +99,10 @@ class SwiftObservationForm(BaseObservationForm):
     def layout(self):
         layout = Layout(
             'urgency',
+            HTML('<hr>'),
+            'target_classification_choices',
             'target_classification',
+            HTML('<hr>'),
             'immediate_objective',
             'science_just',
             Accordion(

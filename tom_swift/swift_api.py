@@ -76,17 +76,17 @@ class SwiftAPI:
 
 
 SWIFT_TARGET_CLASSIFICATION_CHOICES = [
-    'AGN',
-    'Be Binary System',
-    'Comet or Asteroid',
-    'Dwarf Nova',
-    'GRB',
-    'Nova',
-    'Pulsar',
-    'Supernova',
-    'Tidal Disruption Event',
-    'X-Ray Transient',
-    'Other (please specify)',
+    ('AGN', 'AGN'),
+    ('Be Binary System', 'Be Binary System'),
+    ('Comet or Asteroid','Comet or Asteroid'),
+    ('Dwarf Nova', 'Dwarf Nova'),
+    ('GRB', 'GRB'),
+    ('Nova', 'Nova'),
+    ('Pulsar', 'Pulsar'),
+    ('Supernova', 'Supernova'),
+    ('Tidal Disruption Event', 'Tidal Disruption Event'),
+    ('X-Ray Transient', 'X-Ray Transient'),
+    ('Other (please specify)', 'Other (please specify)'),
 ]
 
 
