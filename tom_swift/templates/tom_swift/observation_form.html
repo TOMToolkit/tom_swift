@@ -6,6 +6,22 @@
 <link rel="stylesheet" href="{% static 'tom_observations/css/main.css' %}">
 {% endblock %}
 {% block content %}
+
+<script>
+    function showHideTargetClassificationOtherField() {
+        if(document.getElementById('id_target_classification_choices').options[document.getElementById('id_target_classification_choices').selectedIndex].value == "Other (please specify)") {
+             document.getElementById('id_target_classification').style.display = '';
+        } else {
+             document.getElementById('id_target_classification').style.display = 'none';
+        }
+    };
+</script>
+
+<script type="text/javascript">
+    window.addEventListener("load", showHideTargetClassificationOtherField);
+</script>
+<!-- see also script element at end of file -->
+
 {{ form|as_crispy_errors }}
 <h1>Submit Request to Neil Gehrels Swift Observatory</h1>
 
@@ -61,4 +77,11 @@
         </div>
     </div>
 </div>
+
+<!-- this has to go at the end or else the element can't be found -->
+<script type="text/javascript">
+    var el = document.getElementById("div_id_target_classification_choices");
+    el.addEventListener("click", showHideTargetClassificationOtherField);
+</script>
+
 {% endblock %}
