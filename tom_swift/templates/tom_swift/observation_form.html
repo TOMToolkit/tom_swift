@@ -8,17 +8,77 @@
 {% block content %}
 
 <script>
-    function showHideTargetClassificationOtherField() {
-        if(document.getElementById('id_target_classification_choices').options[document.getElementById('id_target_classification_choices').selectedIndex].value == "Other (please specify)") {
-             document.getElementById('id_target_classification').style.display = '';
-        } else {
-             document.getElementById('id_target_classification').style.display = 'none';
-        }
-    };
+function showHideTargetClassificationFields() {
+    const target_classification = document.getElementById('id_target_classification_choices').options[document.getElementById('id_target_classification_choices').selectedIndex].value;
+    switch (target_classification) {
+        case 'Other (please specify)':
+            // in this case show the target_classification CharField
+            document.getElementById('div_id_target_classification').style.display = '';
+            // and hide the grb_detector and grb_triggertime fields
+            document.getElementById('div_id_grb_detector').style.display = 'none';
+            document.getElementById('div_id_grb_triggertime').style.display = 'none';
+            break;
+        case 'GRB':
+            // in this case show the grb_detector and grb_triggertime fields
+            document.getElementById('div_id_grb_detector').style.display = '';
+            document.getElementById('div_id_grb_triggertime').style.display = '';
+            // and hide the target_classification CharField
+            document.getElementById('div_id_target_classification').style.display = 'none';
+            break;
+        default:
+            // in this case hide all the extra fields
+            document.getElementById('div_id_target_classification').style.display = 'none';
+            document.getElementById('div_id_grb_detector').style.display = 'none';
+            document.getElementById('div_id_grb_triggertime').style.display = 'none';
+            break;
+    }
+};
+
+function showHideMonitoringFields() {
+    const num_of_visits = document.getElementById('id_num_of_visits').value;
+    if (num_of_visits > 1) {
+        // show the monitoring fields
+        document.getElementById('div_id_exp_time_per_visit').style.display = '';
+        document.getElementById('div_id_monitoring_freq').style.display = '';
+    } else {
+        // hide the monitoring fields
+        document.getElementById('div_id_exp_time_per_visit').style.display = 'none';
+        document.getElementById('div_id_monitoring_freq').style.display = 'none';
+    }
+};
+
+function showHideInstrumentModeFields() {
+    const inst = document.getElementById('id_instrument').options[document.getElementById('id_instrument').selectedIndex].value;
+    switch (inst) {
+        case 'XRT':
+            console.log('XRT instrument selected');
+            // show the xrt_mode field; hide the UVOT fields
+            document.getElementById('div_id_xrt_mode').style.display = '';
+            document.getElementById('div_id_uvot_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_just').style.display = 'none';
+            break;
+        case 'UVOT':
+            console.log('UVOT instrument selected');
+            // show the uvot_mode and uvot_just fields; hide the xrt_mode fields
+            document.getElementById('div_id_uvot_mode').style.display = '';
+            document.getElementById('div_id_uvot_just').style.display = '';
+            document.getElementById('div_id_xrt_mode').style.display = 'none';
+            break;
+        case 'BAT':
+            console.log('BAT instrument selected');
+            // not sure what to show or hide here (hide everything?)
+            document.getElementById('div_id_xrt_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_just').style.display = 'none';
+            break;
+    }
+};
 </script>
 
 <script type="text/javascript">
-    window.addEventListener("load", showHideTargetClassificationOtherField);
+    window.addEventListener("load", showHideTargetClassificationFields);
+    window.addEventListener("load", showHideMonitoringFields);
+    window.addEventListener("load", showHideInstrumentModeFields);
 </script>
 <!-- see also script element at end of file -->
 
@@ -78,10 +138,18 @@
     </div>
 </div>
 
-<!-- this has to go at the end or else the element can't be found -->
+<!-- this must at the end or else the elements can't be found and then the eventListener
+     can't be added
+ -->
 <script type="text/javascript">
-    var el = document.getElementById("div_id_target_classification_choices");
-    el.addEventListener("click", showHideTargetClassificationOtherField);
+    var el1 = document.getElementById("div_id_target_classification_choices");
+    el1.addEventListener("click", showHideTargetClassificationFields);
+
+    var el2 = document.getElementById("div_id_instrument");
+    el2.addEventListener("click", showHideInstrumentModeFields);
+
+    var el3 = document.getElementById("div_id_num_of_visits");
+    el3.addEventListener("click", showHideMonitoringFields);
 </script>
 
 {% endblock %}
