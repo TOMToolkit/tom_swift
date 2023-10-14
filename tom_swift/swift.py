@@ -13,30 +13,35 @@ from tom_swift.swift_api import (SwiftAPI,
                                  SWIFT_INSTRUMENT_CHOICES,
                                  SWIFT_OBSERVATION_TYPE_CHOICES,
                                  SWIFT_TARGET_CLASSIFICATION_CHOICES,
-                                 SWIFT_URGENCY_CHOICES)
+                                 SWIFT_URGENCY_CHOICES,
+                                 SWIFT_XRT_MODE_CHOICES)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class SwiftObservationForm(BaseObservationForm):
-    #  TODO: re-consider (or remove?) assumption that all Layout instances have a group property
-    #        (see tom_observations.view,py::get_form::L#255 and other layout methods of other
-    #         facility forms):
-    #            if settings.TARGET_PERMISSIONS_ONLY:
-    #                groups = Div()
-    #            else:
-    #                groups = Row('groups')
-    #
-    # TODO: see www.swift.psu.edu/toop/toorequest.php of the NASA/PSU Swift ToO Request Form
-    # TODO: support "GI Program" requests
-    #
-    debug = forms.BooleanField(required=False, label='Debug', initial=True)
+#  TODO: re-consider (or remove?) assumption that all Layout instances have a group property
+#        (see tom_observations.view,py::get_form::L#255 and other layout methods of other
+#         facility forms):
+#            if settings.TARGET_PERMISSIONS_ONLY:
+#                groups = Div()
+#            else:
+#                groups = Row('groups')
 
-    urgency = forms.ChoiceField(
-        required=True,
-        label='Urgency',
-        choices=SWIFT_URGENCY_CHOICES,
-        initial=SWIFT_URGENCY_CHOICES[2])
+
+class SwiftObservationForm(BaseObservationForm):
+    """The fields in this form follow this documentation:
+    https://www.swift.psu.edu/too_api/index.php?md=TOO%20parameters.md
+    """
+    # TODO: support "GI Program" requests
+
+    #
+    # User identification (not part of the form - see SwiftAPI.get_credentials())
+    #
+
+    #
+    # Source name, type, location, position_error
+    #
+    # source_name, ra, dec are not part of the form
 
     # see tom_swift/templates/tom_swift/observation_form.html for javascript
     # that displays/hides the target_classification ChoiceField if "Other (please specify)""
@@ -76,6 +81,16 @@ class SwiftObservationForm(BaseObservationForm):
 
     monitoring_freq = forms.CharField(required=False, label='Frequency of visits')
     exp_time_per_visit = forms.FloatField(required=False, label='Exposure time per visit(s) [s]')
+
+    #
+    # Instrument mode
+    #
+    xrt_mode = forms.TypedChoiceField(
+        required=False,
+        label='XRT mode',
+        choices=SWIFT_XRT_MODE_CHOICES,
+        coerce=int, # convert the string '6' to int 6
+        initial=6) # Windowed Timing (WT))
 
     uvot_mode = forms.CharField(
         required=False,
@@ -122,6 +137,8 @@ class SwiftObservationForm(BaseObservationForm):
                 ),
                 AccordionGroup('Instrument Information',
                     Div(
+                        'instrument',
+                        'xrt_mode',
                         'uvot_mode',
                         'uvot_just',
                     ),
@@ -356,21 +373,26 @@ class SwiftFacility(BaseObservationFacility):
         # Since "this will count against the number of awarded triggers", show
         # triggers used / total number triggers awarded. (and trigger remaining?)..
 
-        # Instrument (XRT/UVOT/BAT)
-        # TODO: plumb this through to the form
-        self.swift_api.too.instrument = "XRT"
-
-        # XRT Mode
-        # TODO: Auto; Windowed Timing; Photon Counting;
-        self.swift_api.too.xrt_mode = "WT" # observation_payload['xrt_mode']
-        self.swift_api.too.xrt_countrate = 20.0 # observation_payload['xrt_countrate']  # counts/second
-
-        # UVOT Mode
-        self.swift_api.too.uvot_mode = observation_payload['uvot_mode']
-        self.swift_api.too.uvot_just = observation_payload['uvot_just']
-
-        # Ugency
-        self.swift_api.too.urgency = observation_payload['urgency']
+        #
+        # Instrument mode
+        #
+        # self.swift_api.too.instrument is set above in the TOO Request details section
+        # set and unset too.attributes according to the instrument selected
+        if self.swift_api.too.instrument == 'BAT':
+            # not sure what to do here!  TODO: find out
+            self.swift_api.too.xrt_mode = None
+            self.swift_api.too.uvot_mode = None
+            self.swift_api.too.uvot_just = None
+        elif self.swift_api.too.instrument == 'UVOT':
+            self.swift_api.too.uvot_mode = observation_payload['uvot_mode']
+            self.swift_api.too.uvot_just = observation_payload['uvot_just']
+            self.swift_api.too.xrt_mode = None
+        else:
+            # XRT mode
+            self.swift_api.too.xrt_mode = observation_payload['xrt_mode']
+            self.swift_api.too.uvot_mode = None
+            self.swift_api.too.uvot_just = None
+        # TODO: slew_in_place (for GRISM observations - whatever those are)
 
         # Object Brightness
         self.swift_api.too.optical_magnitude = observation_payload['optical_magnitude']

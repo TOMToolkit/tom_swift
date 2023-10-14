@@ -123,30 +123,30 @@ SWIFT_INSTRUMENT_CHOICES = {
 #    too.xrt_mode = 'WT'
 # are equivalent.
 #
-SWIFT_XRT_MODE_CHOICES = {
-    0 : "Auto", # picks a mode based on brightness, but if brightness is known, best to pick yourself
-    1 : "Null",
-    2 : "ShortIM",
-    3 : "LongIM",
-    4 : "PUPD",
-    5 : "LRPD",
-    6 : "WT", # Windowed Timing
-    7 : "PC", # Photon Counting
-    8 : "Raw",
-    9 : "Bias",
-}
-
-
-#
-# Observation Types
-#
-# Note that: 
-# >>> TOO().obs_types
-# ['Spectroscopy', 'Light Curve', 'Position', 'Timing']
-SWIFT_OBSERVATION_TYPE_CHOICES = [
-    ('Spectroscopy', 'Spectroscopy'),
-    ('Light Curve', 'Light Curve'),
-    ('Position', 'Position'),
-    ('Timing', 'Timing'),
+SWIFT_XRT_MODE_CHOICES = [
+    (0, "Auto"), # picks a mode based on brightness, but if brightness is known, best to pick yourself
+    #(1, "Null"),
+    #(2, "ShortIM"),
+    #(3, "LongIM"),
+    #(4, "PUPD"),
+    #(5, "LRPD"),
+    (6, "Windowed Timing (WT)"),
+    (7, "Photon Counting (PC)"),
+    #(8, "Raw"),
+    #(9, "Bias"),
 ]
+
+
+
+#
+# UVOT Modes
+#
+
+# >>> too.uvot_mode = 0x01AB  # Assign too.uvot_mode as a Hexidecimal number:
+# >>> too.uvot_mode  # It's reported as a Hex string:
+# '0x01ab'
+# >>> type(too.uvot_mode)
+# <class 'str'>
+# Any string will validate:
+# >>> too.uvot_mode = "I think I want all UV filters for this, whatever the UVOT team recommends."
 
