@@ -110,17 +110,22 @@ class SwiftObservationForm(BaseObservationForm):
         label='GRB Trigger Date/Time',
         widget=forms.DateTimeInput) # TODO: finish this
     # TODO: validate: required if target_classification is GRB
+    # TODO: make the widget nice
 
     #
     # Science Justification
     #
     immediate_objective = forms.CharField(
         required=False, label='Immediate Objective',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
+        widget=forms.Textarea(attrs={'rows': 4})
+        )
 
     science_just = forms.CharField(
         required=False, label='Science Justification',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
+        widget=forms.Textarea(attrs={'rows': 8})
+        )
 
     #
     # Exposure requested time (total)
@@ -128,7 +133,9 @@ class SwiftObservationForm(BaseObservationForm):
     exposure = forms.FloatField(required=False, label='Exposure time requested [s]',initial=500)
     exp_time_just = forms.CharField(
         required=False, label='Exposure Time Justification',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
+        widget=forms.Textarea(attrs={'rows': 4})
+    )
 
     #
     # Monitoring requests
@@ -148,7 +155,9 @@ class SwiftObservationForm(BaseObservationForm):
     #
     proposal = forms.BooleanField(required=False, label='Are you triggering a GI program?')
     proposal_id = forms.CharField(required=False, label='Proposal ID')
-    propoal_trigger_just = forms.CharField(required=False, label='Trigger Justification')
+    propoal_trigger_just = forms.CharField(
+        required=False, label='Trigger Justification',
+        widget=forms.Textarea(attrs={'rows': 4}))
     proposal_pi = forms.CharField(required=False, label='Proposal PI name')
     # TODO: show/hide according to value of proposal BooleanField
 
@@ -171,9 +180,14 @@ class SwiftObservationForm(BaseObservationForm):
     uvot_just = forms.CharField(
         required=False,
         label='UVOT Mode Justification',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
+        widget=forms.Textarea(attrs={'rows': 4}))
 
-    #slew_in_place = forms.BooleanField(required=False, label='Slew in place?')
+    slew_in_place = forms.BooleanField(
+        required=False,
+        initial=False,
+        help_text='Typically used for GRISM observations.',
+        label='Slew in place')
 
     #
     # Tiling request
