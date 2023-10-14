@@ -4,6 +4,7 @@ from crispy_forms.layout import Layout, Div, Field, Row, HTML
 from crispy_forms.bootstrap import Accordion, AccordionGroup
 from django import forms
 from django.conf import settings
+from django.contrib import messages # not sure if we can do this outside of a View
 
 from tom_observations.facility import BaseObservationForm, BaseObservationFacility, get_service_class
 from tom_targets.models import Target
@@ -58,6 +59,26 @@ class SwiftObservationForm(BaseObservationForm):
         widget=forms.TextInput(attrs={'placeholder': 'Please specify other target classification'})
     )
 
+    #
+    # TOO Request Details
+    #
+    instrument = forms.ChoiceField(
+        required=True,
+        choices=SWIFT_INSTRUMENT_CHOICES,
+        initial=SWIFT_INSTRUMENT_CHOICES[1],  # XRT is default
+    )
+    # TODO: display appropriate mode and justification fields according to
+    # value of instrument ChoiceField (see observation_form.html)
+
+    urgency = forms.ChoiceField(
+        required=True,
+        label='Urgency',
+        choices=SWIFT_URGENCY_CHOICES,
+        initial=SWIFT_URGENCY_CHOICES[2])
+
+    #
+    # Observation Type ('Specroscopy', 'Light Curve', 'Position', 'Timing')
+    #
     obs_type = forms.ChoiceField(
         required=True,
         label='Observation Type',
@@ -65,22 +86,71 @@ class SwiftObservationForm(BaseObservationForm):
         help_text='What is driving the exposure time?',
         initial=SWIFT_OBSERVATION_TYPE_CHOICES[0])
 
+    #
+    # Description of the source brightness for various instruments
+    #
+    # TODO: validation - answer at least one of these questions
     optical_magnitude = forms.FloatField(required=False, label='Optical Magnitude')
     optical_filter = forms.CharField(required=False, label='What filter was this measured in?',initial='u')
-    exposure = forms.FloatField(required=False, label='Exposure time requested [s]',initial=500)
-    exp_time_just = forms.CharField(
-        required=False, label='Time Justification',
+    xrt_countrate = forms.FloatField(required=False, label='XRT Count Rate [counts/second]')
+    bat_countrate = forms.FloatField(required=False, label='BAT Count Rate [counts/second]')
+    other_brightness = forms.CharField(required=False, label='Other Brightness')
+
+    #
+    # GRB stuff
+    #
+    grb_detector = forms.CharField(
+        required=False,
+        label='GRB Detector',
+        widget=forms.TextInput(attrs={'placeholder': 'Should be "Mission/Detection" (e.g. Swift/BAT, Fermi/LAT)'})
+    )
+
+    grb_triggertime = forms.DateTimeField(
+        required=False,
+        label='GRB Trigger Date/Time',
+        widget=forms.DateTimeInput) # TODO: finish this
+    # TODO: validate: required if target_classification is GRB
+
+    #
+    # Science Justification
+    #
+    immediate_objective = forms.CharField(
+        required=False, label='Immediate Objective',
         initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
 
+    science_just = forms.CharField(
+        required=False, label='Science Justification',
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+
+    #
+    # Exposure requested time (total)
+    #
+    exposure = forms.FloatField(required=False, label='Exposure time requested [s]',initial=500)
+    exp_time_just = forms.CharField(
+        required=False, label='Exposure Time Justification',
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+
+    #
+    # Monitoring requests
+    #
+    exp_time_per_visit = forms.FloatField(required=False, label='Exposure time per visit(s) [s]')
     num_of_visits= forms.IntegerField(
         required=False,
         label='Number of visits [integer]',
         help_text=('If number of visits more than one change next exposure'
                    'time per visit and monitoring frequency, otherwise leave blank.'),
         initial=1)
-
     monitoring_freq = forms.CharField(required=False, label='Frequency of visits')
-    exp_time_per_visit = forms.FloatField(required=False, label='Exposure time per visit(s) [s]')
+    # TODO: only expose exp_time_per_visit if monitoring freqency is > 1
+
+    #
+    # Swift Guest Investigator program parameters
+    #
+    proposal = forms.BooleanField(required=False, label='Are you triggering a GI program?')
+    proposal_id = forms.CharField(required=False, label='Proposal ID')
+    propoal_trigger_just = forms.CharField(required=False, label='Trigger Justification')
+    proposal_pi = forms.CharField(required=False, label='Proposal PI name')
+    # TODO: show/hide according to value of proposal BooleanField
 
     #
     # Instrument mode
@@ -99,33 +169,55 @@ class SwiftObservationForm(BaseObservationForm):
 
     # required unless uvot_mode is 0x9999 (Filter of the Day)
     uvot_just = forms.CharField(
-        required=False, label='UVOT Mode Justification',
+        required=False,
+        label='UVOT Mode Justification',
         initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
 
-    science_just = forms.CharField(
-        required=False, label='Science Justification',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+    #slew_in_place = forms.BooleanField(required=False, label='Slew in place?')
 
-    immediate_objective = forms.CharField(
-        required=False, label='Immediate Objective',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)")
+    #
+    # Tiling request
+    #
+    # TODO: tiling
+    # TODO: number_of_tiles (4,7,19,37, unset means calculate based on error radius)
+    # TODO: exposure_time_per_tile
+    # TODO: tiling_justification
+
+    #
+    # Debug parameter
+    #
+    debug = forms.BooleanField(required=False, label='Debug', initial=True)
+
 
 
     def layout(self):
         layout = Layout(
             'urgency',
-            HTML('<hr>'),
-            'target_classification_choices',
-            'target_classification',
-            HTML('<hr>'),
-            'immediate_objective',
-            'science_just',
             Accordion(
-                AccordionGroup('Observation/Exposure Information',
+                AccordionGroup('Target Classification',
+                'target_classification_choices',
+                'target_classification',
+                'grb_detector',
+                'grb_triggertime',
+                ),
+                    AccordionGroup('Science Justification',
+                    Div(
+                        'immediate_objective',
+                        'science_just',
+                    )
+                ),
+                AccordionGroup('Source Brightness',
                     Div(
                         'obs_type',
                         'optical_magnitude',
                         'optical_filter',
+                        'xrt_countrate',
+                        'bat_countrate',
+                        'other_brightness',
+                    ),
+                ),
+                AccordionGroup('Exposure Information',
+                    Div(
                         'exposure',
                         'exp_time_just',
                     ),
@@ -185,7 +277,7 @@ class SwiftObservationForm(BaseObservationForm):
         # in order to call self.add_error(field, error), the field given must match the
         # a field declared on the Form, Thus, the form field names must match the properties
         # of the swifttoolkit.Swift_TOO object (unless we want to maintain a a mapping between
-        # the two).
+        # the two). NB: field can be None.
         #
         logger.debug(f'SwiftObservationForm.is_valid -- fields: {self.fields.keys()}')
         errors: [] = observation_module().validate_observation(observation_payload)
@@ -216,28 +308,14 @@ class SwiftObservationForm(BaseObservationForm):
         # the form.cleaned_data...
         payload = self.cleaned_data.copy() # copy() just to be safe
 
-        # ...but we need to add the target information (which doesn't come from the form).
+        # ...but we need to add the target information because only the target_id is
+        # in the form via get_initial().
         target = Target.objects.get(pk=self.cleaned_data['target_id'])
         payload['source_name'] = target.name
         payload['ra'] = target.ra
         payload['dec'] = target.dec
 
         return payload
-
-class SwiftUVOTObservationForm(SwiftObservationForm):
-    """Extends the SwiftObservationForm with UVOT-specific fields
-    """
-    def layout(self):
-        layout = super().layout()
-        #layout.append('uvot_mode')
-        #layout.append('uvot_just')
-        return layout
-
-class SwiftXRTObservationForm(SwiftObservationForm):
-    pass
-
-class SwiftBATObservationForm(SwiftObservationForm):
-    pass
 
 
 class SwiftFacility(BaseObservationFacility):
