@@ -282,7 +282,7 @@ class SwiftFacility(BaseObservationFacility):
             new_context_data['resolved_target_dec'] = resolved_target.dec
         else:
             # TODO: display bootstrap warning alert
-            new_context_data['resolved_target_name'] = 'Not found'
+            new_context_data['resolved_target_name'] = 'Target not resolved'
 
         facility_context_data.update(new_context_data)
         return facility_context_data
