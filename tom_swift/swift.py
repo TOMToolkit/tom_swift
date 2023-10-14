@@ -264,10 +264,15 @@ class SwiftFacility(BaseObservationFacility):
         """
         facility_context_data = super().get_facility_context_data(**kwargs)
         logger.debug(f'get_facility_context_data -- kwargs: {kwargs}')
+
+        # get the username from the SwiftAPI for the context
+        username = self.swift_api.get_credentials()[0]  # returns (username, shared_secret)
         new_context_data = {
             'version': __version__,  # from tom_swift/__init__.py
-            'username': self.swift_api.too.username,
+            'username': username,
         }
+
+        # get the resovled target info from the SwiftAPI
         target = kwargs['target']
         resolved_target = self.swift_api.resolve_target(target)
         if resolved_target:

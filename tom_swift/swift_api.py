@@ -34,15 +34,21 @@ class SwiftAPI:
         self.too = TOO()
         self.too_request = TOORequests()
 
-        # gather username
-        try:
-            self.too.username = settings.FACILITIES['SWIFT'].get('SWIFT_USERNAME', 'SWIFT_USERNAME not configured')
-            self.too.shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_PASSWORD', 'SWIFT_PASSWORD not configured')
 
-            logger.info(f'swift username: {self.too.username}')
+    def get_credentials(self) -> (str, str):
+        """returns username and password from settings.py
+
+        Use username and password to set the too.username and too.shared_secret respectively.
+        """
+        try:
+            username = settings.FACILITIES['SWIFT'].get('SWIFT_USERNAME', 'SWIFT_USERNAME not configured')
+            shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_PASSWORD', 'SWIFT_PASSWORD not configured')
+
+            logger.info(f'swift username: {username}')
         except KeyError as ex:
             logger.error(f"'SWIFT' configuration dictionary not defined in settings.FACILITIES")
             raise ImproperlyConfigured
+        return username, shared_secret
 
 
     def resolve_target(self, target: Target):
