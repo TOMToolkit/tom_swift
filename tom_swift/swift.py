@@ -458,18 +458,10 @@ class SwiftFacility(BaseObservationFacility):
         #    logger.debug(f'validate_observation - too.status.{property}: {getattr(self.swift_api.too.status, property)}')
 
         if not (too_is_valid and too_is_server_valid):
-            # TODO: extract the error messages from the response
-            # the too.status.errors is a list of strings. for example: ['Missing key: exp_time_just']
             logger.debug(f'validate_observation - too.status.status: {self.swift_api.too.status.status}')
             logger.debug(f'validate_observation - too.status.errors: {self.swift_api.too.status.errors}')
             logger.debug(f'validate_observation - type(too.status.errors): {type(self.swift_api.too.status.errors)}')
             
-            # this assumes the format of the error message, which is not correct
-            #for error_string in self.swift_api.too.status.errors:
-            #    field = error_string.split(':')[1].strip()
-            #    error = error_string.split(':')[0].strip()
-            #    validation_errors.append((field, error))
-
             validation_errors = self.swift_api.too.status.errors
 
         return validation_errors
