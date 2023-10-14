@@ -333,44 +333,82 @@ class SwiftFacility(BaseObservationFacility):
          * https://www.swift.psu.edu/too_api/
          * https://www.swift.psu.edu/too_api/index.php?md=TOO parameters.md
         """
-        #logger.debug(f'_configure_too - observation_payload: {observation_payload}')
-        #for key, value in observation_payload.items():
-        #    logger.debug(f'_configure_too -- observation_payload.{key}: {value}')
-
-
-        # User information (this should already be configured in the SwiftAPI.__init__())
-        logger.debug(f'_configure_too - self.swift_api.too.username: {self.swift_api.too.username}')
-        logger.debug(f'_configure_too - self.swift_api.too.shared_secret: {self.swift_api.too.shared_secret}')
-
-        # Information about the request
-        # (the username and shared_secret are already configured in the SwiftAPI.__init__())
         self.swift_api.too.debug = observation_payload['debug']
 
-        # Object Information
+        #
+        # User identification
+        #
+        self.swift_api.too.username, self.swift_api.too.shared_secret = self.swift_api.get_credentials()
+
+        #
+        # Source name, type, location, position_error
+        #
         self.swift_api.too.source_name = observation_payload['source_name']
         self.swift_api.too.ra = observation_payload['ra']
         self.swift_api.too.dec = observation_payload['dec']
 
-        # Target Type or Classification
-        # decide which field to use based on the value of target_classification_choices
+        # Get the source_type from target_classification_choices or target_classification
+        # depending on if they selected "Other (please specify)" in the drop-down menu
         if observation_payload['target_classification_choices'] == 'Other (please specify)':
-            # they specified a custom target classification. use that.
+            # they specified a custom target classification. So, use that.
             self.swift_api.too.source_type = observation_payload['target_classification']
         else:
             # use the value from the drop-down menu
             self.swift_api.too.source_type = observation_payload['target_classification_choices']
 
-        # What is driving the exposure time?
+        #
+        # TOO Request details
+        #
+        self.swift_api.too.instrument = observation_payload['instrument']
+        self.swift_api.too.urgency = observation_payload['urgency']
+
+        #
+        # Observation Type
+        #     What is driving the exposure time? (Spectroscopy, Light Curve, Position, Timing)
         self.swift_api.too.obs_type = observation_payload['obs_type']
 
-        # TODO: Tiling Support
-        # Tiling (yes/no)
-        # if yes, then
-        #   Number of Tiles; Exposure Time per Tile; Tiling Justification
+        #
+        # Description of the source brightness for various instruments
+        #
+        # Object Brightness
+        self.swift_api.too.opt_mag = observation_payload['optical_magnitude']
+        self.swift_api.too.opt_filt = observation_payload['optical_filter']
+        self.swift_api.too.xrt_countrate = observation_payload['xrt_countrate']  # counts/second
+        self.swift_api.too.bat_countrate = observation_payload['bat_countrate']  # counts/second
+        self.swift_api.too.other_brightness = observation_payload['other_brightness']
+        # TODO: validation - answer at least one of these questions
 
-        # Immediate Objective
+        #
+        # GRB stuff
+        #
+        # TODO: GRB stuff
+
+        #
+        # Science Justification
+        #
         self.swift_api.too.immediate_objective = observation_payload['immediate_objective']
+        self.swift_api.too.science_just = observation_payload['science_just']
 
+        #
+        # Exposure requested time (total)
+        #
+        self.swift_api.too.exposure = observation_payload['exposure']
+        self.swift_api.too.exp_time_just = observation_payload['exp_time_just']
+
+        #
+        # Monitoring requests
+        #
+        self.swift_api.too.num_of_visits == observation_payload['num_of_visits'] # use assignment expression?
+        if self.swift_api.too.num_of_visits > 1:
+            self.swift_api.too.exp_time_per_visit = observation_payload['exp_time_per_visit']
+            self.swift_api.too.monitoring_freq = observation_payload['monitoring_freq']
+        # TODO: Units for monitoring_freq (days, hours, minutes, seconds, orbits, others, etc.)
+        # TODO: make ChoiceField for valid units (above) and (here) construct the formatted text
+        #       for the monitoring_freq field (e.g. "1 orbit", "2 days", "3 hours", etc.)
+
+        #
+        # Swift Guest Investigator program parameters
+        #
         # TODO: Guest InvestigatorI Program Support
         # Are you triggering a GI program? (yes/no)
         # if yes, then
@@ -399,31 +437,22 @@ class SwiftFacility(BaseObservationFacility):
             self.swift_api.too.uvot_just = None
         # TODO: slew_in_place (for GRISM observations - whatever those are)
 
-        # Object Brightness
-        self.swift_api.too.optical_magnitude = observation_payload['optical_magnitude']
-        self.swift_api.too.optical_filter = observation_payload['optical_filter']
-        #self.swift_api.too.xrt_countrate = observation_payload['xrt_countrate']  # counts/second
-        #self.swift_api.too.bat_countrate = observation_payload['bat_countrate']  # counts/second
-        #self.swift_api.too.other_brightness = observation_payload['other_brightness']
+        #
+        # Tiling request
+        #
+        # TODO: tiling: BooleanField
+        # if yes, then
+        #    number_of_tiles, exposure_time_per_tile, tiling_justification
 
-        # Science Justification
-        self.swift_api.too.science_just = observation_payload['science_just']
+        #
+        # Debug parameter
+        #
+        self.swift_api.too.debug = observation_payload['debug']
 
-        # Observation Strategy
-        # Single Observation / Multiple Observations
-        self.swift_api.too.exposure = observation_payload['exposure']
-        self.swift_api.too.exp_time_just = observation_payload['exp_time_just']
-        # if Multiple Observations, then Monitoring Details
-        #    Number of Visits; Exposure Time per Visit; Monitoring Cadence Number + Units
-        multiple_observations = False  # TODO: plumb this through to the form
-        if multiple_observations:
-            self.swift_api.too.num_of_visits = observation_payload['num_of_visits']
-            self.swift_api.too.exp_time_per_visit = observation_payload['exp_time_per_visit']
-            self.swift_api.too.monitoring_freq = observation_payload['monitoring_freq']
-        # TODO: Units for monitoring_freq (days, hours, minutes, seconds, orbits, others, etc.)
+        logger.info(f'SwiftFacility._configure_too - configured too:\n{self.swift_api.too}')
 
 
-    def validate_observation(self, observation_payload) -> [()]:
+    def validate_observation(self, observation_payload) -> []:
         """Perform a dry-run of submitting the observation.
 
         See submit_observation() for details.
