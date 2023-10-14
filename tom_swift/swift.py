@@ -239,21 +239,6 @@ class SwiftObservationForm(BaseObservationForm):
             'debug'
         ) # end layout
 
-#            Layout(
-#            'target_classification',
-#            'urgency',
-#            'observation_type',
-#            'optical_magnitude',
-#            'optical_filter',
-#            'exposure_time',
-#            'num_of_visits',
-#            HTML('<p>If number of visits more than one change next exposure time per visit and monitoring frequency, otherwise leave blank.</p>'),
-#            'exp_time_per_visit',
-#            'monitoring_freq',
-#            'exp_time_just',
-#            'immediate_objective',
-#            'science_just',
-#        )
         return layout
 
     def is_valid(self):
