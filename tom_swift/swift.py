@@ -53,10 +53,10 @@ class SwiftObservationForm(BaseObservationForm):
         initial=SWIFT_TARGET_CLASSIFICATION_CHOICES[0]
     )
     target_classification = forms.CharField(
-        required=False, label=False,
-        initial='please specify other target classification'
+        required=False, label='Other Target Classification',
+        # here's how to add placehoder text as an alternative to help_text
+        widget=forms.TextInput(attrs={'placeholder': 'Please specify other target classification'})
     )
-    # TODO: get the correct value into the too in SwiftFacility._configure_too()
 
     obs_type = forms.ChoiceField(
         required=True,
