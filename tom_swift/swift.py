@@ -186,7 +186,7 @@ class SwiftObservationForm(BaseObservationForm):
     slew_in_place = forms.BooleanField(
         required=False,
         initial=False,
-        help_text='Typically used for GRISM observations.',
+        help_text='Typically for GRISM observations.',
         label='Slew in place')
 
     #
@@ -220,6 +220,19 @@ class SwiftObservationForm(BaseObservationForm):
                         'science_just',
                     )
                 ),
+                AccordionGroup('Instrument Information',
+                    Div(
+                        Div(# this div is to put instrument drop-down and slew_in_place checkbox
+                            # side-by-side in the same row
+                            Div(Field('instrument'), css_class='col-md-6',),
+                            Div(Field('slew_in_place'), css_class='col-md-6',),
+                            css_class='row',
+                        ),
+                        'xrt_mode',
+                        'uvot_mode',
+                        'uvot_just',
+                    ),
+                ),
                 AccordionGroup('Source Brightness',
                     Div(
                         'obs_type',
@@ -240,15 +253,6 @@ class SwiftObservationForm(BaseObservationForm):
                         'exp_time_per_visit',
                         'monitoring_freq',
                     )
-                ),
-                AccordionGroup('Instrument Information',
-                    Div(
-                        'instrument',
-                        'slew_in_place', # TODO: put instrument and slew_in_place on same row
-                        'xrt_mode',
-                        'uvot_mode',
-                        'uvot_just',
-                    ),
                 ),
             ),
             'debug'
@@ -513,7 +517,6 @@ class SwiftFacility(BaseObservationFacility):
             self.swift_api.too.xrt_mode = observation_payload['xrt_mode']
             self.swift_api.too.uvot_mode = None
             self.swift_api.too.uvot_just = None
-        # TODO: slew_in_place (for GRISM observations - whatever those are)
         self.swift_api.too.slew_in_place = observation_payload['slew_in_place']
 
         #
