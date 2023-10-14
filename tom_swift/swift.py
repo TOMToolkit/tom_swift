@@ -244,6 +244,7 @@ class SwiftObservationForm(BaseObservationForm):
                 AccordionGroup('Instrument Information',
                     Div(
                         'instrument',
+                        'slew_in_place', # TODO: put instrument and slew_in_place on same row
                         'xrt_mode',
                         'uvot_mode',
                         'uvot_just',
@@ -513,6 +514,7 @@ class SwiftFacility(BaseObservationFacility):
             self.swift_api.too.uvot_mode = None
             self.swift_api.too.uvot_just = None
         # TODO: slew_in_place (for GRISM observations - whatever those are)
+        self.swift_api.too.slew_in_place = observation_payload['slew_in_place']
 
         #
         # Tiling request
