@@ -73,6 +73,16 @@ class SwiftAPI:
         return resolved_target
 
 
+#
+# Urgency
+#
+SWIFT_URGENCY_CHOICES = [
+    (1, 'Within 4 hours (Wakes up the Swift Observatory Duty Scientist).'),
+    (2, 'Within 24 hours'),
+    (3, 'Days to a week'), # default
+    (4, 'Week to a month'),
+]
+
 SWIFT_TARGET_CLASSIFICATION_CHOICES = [
     ('AGN', 'AGN'),
     ('Be Binary System', 'Be Binary System'),
@@ -87,37 +97,27 @@ SWIFT_TARGET_CLASSIFICATION_CHOICES = [
     ('Other (please specify)', 'Other (please specify)'),
 ]
 
-
 #
-# Urgency
+# Observation Types
 #
-SWIFT_URGENCY_CHOICES = [
-    (1, 'Within 4 hours (Wakes up the Swift Observatory Duty Scientist).'),
-    (2, 'Within 24 hours'),
-    (3, 'Days to a week'), # default
-    (4, 'Week to a month'),
+# Note that:
+# >>> TOO().obs_types
+# ['Spectroscopy', 'Light Curve', 'Position', 'Timing']
+SWIFT_OBSERVATION_TYPE_CHOICES = [
+    ('Spectroscopy', 'Spectroscopy'),
+    ('Light Curve', 'Light Curve'),
+    ('Position', 'Position'),
+    ('Timing', 'Timing'),
 ]
 
 #
 # Instruments
 #
-SWIFT_INSTRUMENT_CHOICES = {
-    'UVOT' : 'UV/Optical Telescope',
-    'XRT' : 'X-ray Telescope',
-    'BAT' : 'Burst Alert Telescope',
-}
-
-#
-# UVOT Modes
-#
-
-# >>> too.uvot_mode = 0x01AB  # Assign too.uvot_mode as a Hexidecimal number:
-# >>> too.uvot_mode  # It's reported as a Hex string:
-# '0x01ab'
-# >>> type(too.uvot_mode)
-# <class 'str'>
-# Any string will validate:
-# >>> too.uvot_mode = "I think I want all UV filters for this, whatever the UVOT team recommends."
+SWIFT_INSTRUMENT_CHOICES = [
+    ('UVOT', 'UV/Optical Telescope (UVOT)'),
+    ('XRT', 'X-ray Telescope (XRT)'),
+    ('BAT', 'Burst Alert Telescope (BAT)'),
+]
 
 
 #
