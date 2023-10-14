@@ -442,21 +442,20 @@ class SwiftFacility(BaseObservationFacility):
             logger.debug(f'validate_observation - calling too.server_validate()')
             too_is_server_valid = self.swift_api.too.server_validate()
         
-        logger.debug(f'validate_observation - too.status: {self.swift_api.too.status}')
-        #logger.debug(f'validate_observation - dir(too.status): {dir(self.swift_api.too.status)}')
-
-        too_status_properties_removed = [
-            'clear', 'submit', 'jwt', 'queue',
-            'error', 'warning', 'validate',
-        ]
-        too_status_properties = ['api_data', 'api_name', 'api_version', 'began',
-                                 'complete', 'completed', 'errors', 'fetchresult',
-                                 'ignorekeys', 'jobnumber', 'result', 'shared_secret',
-                                 'status', 'submit_url', 'timeout', 'timestamp',
-                                 'too_api_dict', 'too_id', 'username', 'warnings']
-        
-        for property in too_status_properties:
-            logger.debug(f'validate_observation - too.status.{property}: {getattr(self.swift_api.too.status, property)}')
+        #logger.debug(f'validate_observation - too.status: {self.swift_api.too.status}')
+        ##logger.debug(f'validate_observation - dir(too.status): {dir(self.swift_api.too.status)}')
+        #too_status_properties_removed = [
+        #    'clear', 'submit', 'jwt', 'queue',
+        #    'error', 'warning', 'validate',
+        #]
+        #too_status_properties = ['api_data', 'api_name', 'api_version', 'began',
+        #                         'complete', 'completed', 'errors', 'fetchresult',
+        #                         'ignorekeys', 'jobnumber', 'result', 'shared_secret',
+        #                         'status', 'submit_url', 'timeout', 'timestamp',
+        #                         'too_api_dict', 'too_id', 'username', 'warnings']
+        #
+        #for property in too_status_properties:
+        #    logger.debug(f'validate_observation - too.status.{property}: {getattr(self.swift_api.too.status, property)}')
 
         if not (too_is_valid and too_is_server_valid):
             # TODO: extract the error messages from the response
