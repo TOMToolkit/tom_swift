@@ -73,12 +73,30 @@ function showHideInstrumentModeFields() {
             break;
     }
 };
+
+function showHideTilingFields() {
+    if (document.getElementById('id_tiling').checked) {
+        console.log('tiling selected')
+        // show the tiling fields
+        document.getElementById('div_id_number_of_tiles').style.display = '';
+        document.getElementById('div_id_exposure_time_per_tile').style.display = '';
+        document.getElementById('div_id_tiling_justification').style.display = '';
+    } else {
+        console.log('tiling not selected')
+        // hide the tiling fields
+        document.getElementById('div_id_number_of_tiles').style.display = 'none';
+        document.getElementById('div_id_exposure_time_per_tile').style.display = 'none';
+        document.getElementById('div_id_tiling_justification').style.display = 'none';
+    }
+};
+
 </script>
 
 <script type="text/javascript">
     window.addEventListener("load", showHideTargetClassificationFields);
     window.addEventListener("load", showHideMonitoringFields);
     window.addEventListener("load", showHideInstrumentModeFields);
+    window.addEventListener("load", showHideTilingFields);
 </script>
 <!-- see also script element at end of file -->
 
@@ -150,6 +168,9 @@ function showHideInstrumentModeFields() {
 
     var el3 = document.getElementById("div_id_num_of_visits");
     el3.addEventListener("click", showHideMonitoringFields);
+
+    var el4 = document.getElementById("div_id_tiling");
+    el4.addEventListener("click", showHideTilingFields);
 </script>
 
 {% endblock %}

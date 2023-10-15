@@ -192,10 +192,40 @@ class SwiftObservationForm(BaseObservationForm):
     #
     # Tiling request
     #
-    # TODO: tiling
-    # TODO: number_of_tiles (4,7,19,37, unset means calculate based on error radius)
-    # TODO: exposure_time_per_tile
-    # TODO: tiling_justification
+    tiling = forms.BooleanField(
+        required=False,
+        initial=False,
+        help_text='Is this a tiling request?')
+
+    number_of_tiles = forms.IntegerField(
+        required=False,
+        help_text=(
+            'Set this if you want a fixed number of tiles. Traditional tiling patterns'
+            ' are 4, 7, 19, or 37 "circular" tilings. If not set, then it will be calculated'
+            ' based on target error radius.'
+        ),
+        initial=None,
+    )
+
+    exposure_time_per_tile = forms.FloatField(
+        required=False,
+        help_text=(
+            'Set this if you want to have a fixed exposure time per tile. Otherwise, it will'
+            ' be exposure time / number_of_tiles'
+        ),
+        initial=None,
+    )
+
+    tiling_justification = forms.CharField(
+        required=False,
+        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
+        help_text='Text description of why tiling is justified.',
+        widget=forms.Textarea(attrs={
+            'rows': 4,
+            'placeholder': 'Should be "Mission/Detection" (e.g. Swift/BAT, Fermi/LAT)'
+        }),
+    )
+
 
     #
     # Debug parameter
@@ -214,7 +244,7 @@ class SwiftObservationForm(BaseObservationForm):
                 'grb_detector',
                 'grb_triggertime',
                 ),
-                    AccordionGroup('Science Justification',
+                AccordionGroup('Science Justification',
                     Div(
                         'immediate_objective',
                         'science_just',
@@ -253,6 +283,17 @@ class SwiftObservationForm(BaseObservationForm):
                         'exp_time_per_visit',
                         'monitoring_freq',
                     )
+                ),
+                AccordionGroup('Tiling',
+                    Div(
+                        'tiling',
+                        'number_of_tiles',
+                        'exposure_time_per_tile',
+                        'tiling_justification',
+                    )
+                ),
+                AccordionGroup('Swift Guest Investigator',
+                    Div()
                 ),
             ),
             'debug'
@@ -306,7 +347,8 @@ class SwiftObservationForm(BaseObservationForm):
         (via the Facility's validate_observation() and submit_observation() methods).
 
         For Swift, since we're configuring a Swift_TOO object, the form.cleaned_data
-        plus the target information should be sufficient.
+        plus the target information should be sufficient. See _configure_too() for how
+        the observation_payload is used to configure the TOO attributes.
         """
         # At the moment it's unclear why the obeervation_payload needs to differ from
         # the form.cleaned_data...
@@ -502,7 +544,7 @@ class SwiftFacility(BaseObservationFacility):
         # Instrument mode
         #
         # self.swift_api.too.instrument is set above in the TOO Request details section
-        # set and unset too.attributes according to the instrument selected
+        # Set and unset too.attributes according to the instrument selected.
         if self.swift_api.too.instrument == 'BAT':
             # not sure what to do here!  TODO: find out
             self.swift_api.too.xrt_mode = None
@@ -522,9 +564,19 @@ class SwiftFacility(BaseObservationFacility):
         #
         # Tiling request
         #
-        # TODO: tiling: BooleanField
-        # if yes, then
-        #    number_of_tiles, exposure_time_per_tile, tiling_justification
+        if observation_payload['tiling']:
+            # this is a tiling request to set tiling too attributes
+            self.swift_api.too.tiling = observation_payload['tiling']
+            self.swift_api.too.number_of_tiles = observation_payload['number_of_tiles']
+            self.swift_api.too.exposure_time_per_tile = observation_payload['exposure_time_per_tile']
+            # TODO: validation, if exposure_time_per_tile is unset, position_error should be set
+            self.swift_api.too.tiling_justification = observation_payload['tiling_justification']
+        else:
+            # just in case there are previously set attributes lingering in the too, reset them
+            self.swift_api.too.tiling = False
+            self.swift_api.too.number_of_tiles = None
+            self.swift_api.too.exposure_time_per_tile = None
+            self.swift_api.too.tiling_justification = None
 
         #
         # Debug parameter
