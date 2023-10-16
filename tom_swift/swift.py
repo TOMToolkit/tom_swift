@@ -181,9 +181,9 @@ class SwiftObservationForm(BaseObservationForm):
 
     uvot_mode = forms.CharField(
         required=False,
-        label='UVOT filter mode (can write instructions or specific mode)',
+        label='UVOT filter mode',
         initial='0x9999',
-        help_text=mark_safe(('Supply specific mode or written instructions.'
+        help_text=mark_safe(('Supply a specific UVOT Filter mode or written instructions.'
                              ' See <a target=_blank'
                              ' href=https://www.swift.psu.edu/operations/mode_lookup.php>'
                              'UVOT Mode Lookup Tool</a>'
