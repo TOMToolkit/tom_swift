@@ -5,6 +5,7 @@ from crispy_forms.bootstrap import Accordion, AccordionGroup
 from django import forms
 from django.conf import settings
 from django.contrib import messages # not sure if we can do this outside of a View
+from django.utils.safestring import mark_safe
 
 from tom_observations.facility import BaseObservationForm, BaseObservationFacility, get_service_class
 from tom_targets.models import Target
@@ -181,7 +182,13 @@ class SwiftObservationForm(BaseObservationForm):
     uvot_mode = forms.CharField(
         required=False,
         label='UVOT filter mode (can write instructions or specific mode)',
-        initial='0x9999') # 0x9999 is the "Filter of the Day" and does not require justification
+        initial='0x9999',
+        help_text=mark_safe(('Supply specific mode or written instructions.'
+                             ' See <a target=_blank'
+                             ' href=https://www.swift.psu.edu/operations/mode_lookup.php>'
+                             'UVOT Mode Lookup Tool</a>'
+                            )),
+        ) # 0x9999 is the "Filter of the Day" and does not require justification
 
     # required unless uvot_mode is 0x9999 (Filter of the Day)
     uvot_just = forms.CharField(
