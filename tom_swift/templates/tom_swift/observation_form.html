@@ -90,6 +90,22 @@ function showHideTilingFields() {
     }
 };
 
+function showHideSwiftGIProposalFields() {
+    if (document.getElementById('id_proposal').checked) {
+        console.log('proposal selected')
+        // show the proposal fields
+        document.getElementById('div_id_proposal_id').style.display = '';
+        document.getElementById('div_id_proposal_pi').style.display = '';
+        document.getElementById('div_id_proposal_trigger_just').style.display = '';
+    } else {
+        console.log('proposal not selected')
+        // hide the proposal fields
+        document.getElementById('div_id_proposal_id').style.display = 'none';
+        document.getElementById('div_id_proposal_pi').style.display = 'none';
+        document.getElementById('div_id_proposal_trigger_just').style.display = 'none';
+    }
+};
+
 </script>
 
 <script type="text/javascript">
@@ -97,6 +113,7 @@ function showHideTilingFields() {
     window.addEventListener("load", showHideMonitoringFields);
     window.addEventListener("load", showHideInstrumentModeFields);
     window.addEventListener("load", showHideTilingFields);
+    window.addEventListener("load", showHideSwiftGIProposalFields);
 </script>
 <!-- see also script element at end of file -->
 
@@ -171,6 +188,9 @@ function showHideTilingFields() {
 
     var el4 = document.getElementById("div_id_tiling");
     el4.addEventListener("click", showHideTilingFields);
+
+    var el5 = document.getElementById("div_id_proposal");
+    el5.addEventListener("click", showHideSwiftGIProposalFields);
 </script>
 
 {% endblock %}

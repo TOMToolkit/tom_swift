@@ -155,7 +155,7 @@ class SwiftObservationForm(BaseObservationForm):
     #
     proposal = forms.BooleanField(required=False, label='Are you triggering a GI program?')
     proposal_id = forms.CharField(required=False, label='Proposal ID')
-    propoal_trigger_just = forms.CharField(
+    proposal_trigger_just = forms.CharField(
         required=False, label='Trigger Justification',
         widget=forms.Textarea(attrs={'rows': 4}))
     proposal_pi = forms.CharField(required=False, label='Proposal PI name')
@@ -293,7 +293,12 @@ class SwiftObservationForm(BaseObservationForm):
                     )
                 ),
                 AccordionGroup('Swift Guest Investigator',
-                    Div()
+                    Div(
+                        'proposal',
+                        'proposal_id',
+                        'proposal_pi',
+                        'proposal_trigger_just',
+                    )
                 ),
             ),
             'debug'
@@ -539,6 +544,18 @@ class SwiftFacility(BaseObservationFacility):
         #   GI Program Details: Proposal ID; Proposal PI; Trigger Justification
         # Since "this will count against the number of awarded triggers", show
         # triggers used / total number triggers awarded. (and trigger remaining?)..
+        if observation_payload['proposal']:
+            # this is a Swift Guest Investigator request, so set it's too attributes
+            self.swift_api.too.proposal = observation_payload['proposal']
+            self.swift_api.too.proposal_id = observation_payload['proposal_id']
+            self.swift_api.too.proposal_pi = observation_payload['proposal_pi']
+            self.swift_api.too.proposal_trigger_just = observation_payload['proposal_trigger_just']
+        else:
+            # just in case there are previously set attributes lingering in the too, reset them
+            self.swift_api.too.proposal = False
+            self.swift_api.too.proposal_id = None
+            self.swift_api.too.proposal_pi = None
+            self.swift_api.too.proposal_trigger_just = None
 
         #
         # Instrument mode
