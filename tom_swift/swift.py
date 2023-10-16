@@ -216,6 +216,7 @@ class SwiftObservationForm(BaseObservationForm):
 
     exposure_time_per_tile = forms.FloatField(
         required=False,
+        label='Exposure time per tile [s]',
         help_text=(
             'Set this if you want to have a fixed exposure time per tile. Otherwise, it will'
             ' be exposure time / number_of_tiles'
@@ -225,11 +226,10 @@ class SwiftObservationForm(BaseObservationForm):
 
     tiling_justification = forms.CharField(
         required=False,
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
         help_text='Text description of why tiling is justified.',
         widget=forms.Textarea(attrs={
             'rows': 4,
-            'placeholder': 'Should be "Mission/Detection" (e.g. Swift/BAT, Fermi/LAT)'
+            'placeholder': 'Please describe why tiling is justified.'
         }),
     )
 
