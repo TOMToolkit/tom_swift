@@ -59,6 +59,13 @@ class SwiftObservationForm(BaseObservationForm):
         widget=forms.TextInput(attrs={'placeholder': 'Please specify other target classification'})
     )
 
+    poserr = forms.FloatField(
+        required=False,
+        initial=0.0,
+        label='Position Error [arcminutes]',
+        help_text='90% confidence arcminutes.'
+    )
+
     #
     # TOO Request Details
     #
@@ -238,11 +245,12 @@ class SwiftObservationForm(BaseObservationForm):
         layout = Layout(
             'urgency',
             Accordion(
-                AccordionGroup('Target Classification',
+                AccordionGroup('Target Information',
                 'target_classification_choices',
                 'target_classification',
                 'grb_detector',
                 'grb_triggertime',
+                'poserr',
                 ),
                 AccordionGroup('Science Justification',
                     Div(
@@ -475,6 +483,7 @@ class SwiftFacility(BaseObservationFacility):
         self.swift_api.too.source_name = observation_payload['source_name']
         self.swift_api.too.ra = observation_payload['ra']
         self.swift_api.too.dec = observation_payload['dec']
+        self.swift_api.too.poserr = observation_payload['poserr']
 
         # Get the source_type from target_classification_choices or target_classification
         # depending on if they selected "Other (please specify)" in the drop-down menu
