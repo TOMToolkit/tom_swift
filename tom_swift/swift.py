@@ -76,8 +76,6 @@ class SwiftObservationForm(BaseObservationForm):
         choices=SWIFT_INSTRUMENT_CHOICES,
         initial=SWIFT_INSTRUMENT_CHOICES[1],  # XRT is default
     )
-    # TODO: display appropriate mode and justification fields according to
-    # value of instrument ChoiceField (see observation_form.html)
 
     urgency = forms.ChoiceField(
         required=True,
@@ -99,10 +97,13 @@ class SwiftObservationForm(BaseObservationForm):
     #
     # TODO: validation - answer at least one of these questions
     optical_magnitude = forms.FloatField(required=False, label='Optical Magnitude')
-    optical_filter = forms.CharField(required=False, label='What filter was this measured in?',initial='u')
+    optical_filter = forms.CharField(required=False, help_text='What filter was the optical magnitude measured in?', initial='u')
     xrt_countrate = forms.FloatField(required=False, label='XRT Count Rate [counts/second]')
     bat_countrate = forms.FloatField(required=False, label='BAT Count Rate [counts/second]')
-    other_brightness = forms.CharField(required=False, label='Other Brightness')
+    other_brightness = forms.CharField(
+        required=False, label='Other Brightness',
+        widget=forms.TextInput(attrs={'placeholder': 'Any other brightness information.'})
+    )
 
     #
     # GRB stuff
@@ -125,14 +126,16 @@ class SwiftObservationForm(BaseObservationForm):
     #
     immediate_objective = forms.CharField(
         required=False, label='Immediate Objective',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
-        widget=forms.Textarea(attrs={'rows': 4})
+        widget=forms.Textarea(attrs={
+            'rows': 2,
+            'placeholder' : 'One sentence explanation of this TOO request.'})
         )
 
     science_just = forms.CharField(
         required=False, label='Science Justification',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
-        widget=forms.Textarea(attrs={'rows': 8})
+        widget=forms.Textarea(attrs={
+            'rows': 8,
+            'placeholder' : 'A pursuasive paragraph or two explaining why this object requires rapid observation.'})
         )
 
     #
@@ -141,8 +144,9 @@ class SwiftObservationForm(BaseObservationForm):
     exposure = forms.FloatField(required=False, label='Exposure time requested [s]',initial=500)
     exp_time_just = forms.CharField(
         required=False, label='Exposure Time Justification',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
-        widget=forms.Textarea(attrs={'rows': 4})
+        widget=forms.Textarea(attrs={
+            'rows': 2,
+            'placeholder': 'Briefly justify the exposure time requested.'}),
     )
 
     #
@@ -152,8 +156,8 @@ class SwiftObservationForm(BaseObservationForm):
     num_of_visits= forms.IntegerField(
         required=False,
         label='Number of visits [integer]',
-        help_text=('If number of visits more than one change next exposure'
-                   'time per visit and monitoring frequency, otherwise leave blank.'),
+        help_text=('If number of visits is more than one, then complete exposure'
+                   ' time per visit and monitoring frequency.'),
         initial=1)
     monitoring_freq = forms.IntegerField(required=False, label='Monitoring Frequency', initial=1)
     monitoring_units = forms.ChoiceField(
@@ -170,7 +174,6 @@ class SwiftObservationForm(BaseObservationForm):
         required=False, label='Trigger Justification',
         widget=forms.Textarea(attrs={'rows': 4}))
     proposal_pi = forms.CharField(required=False, label='Proposal PI name')
-    # TODO: show/hide according to value of proposal BooleanField
 
     #
     # Instrument mode
@@ -191,14 +194,18 @@ class SwiftObservationForm(BaseObservationForm):
                              ' href=https://www.swift.psu.edu/operations/mode_lookup.php>'
                              'UVOT Mode Lookup Tool</a>'
                             )),
-        ) # 0x9999 is the "Filter of the Day" and does not require justification
+    ) # 0x9999 is the "Filter of the Day" and does not require justification
 
     # required unless uvot_mode is 0x9999 (Filter of the Day)
     uvot_just = forms.CharField(
         required=False,
         label='UVOT Mode Justification',
-        initial="TOM Toolkit test by llindstrom@lco.global (please contact if this is a problem)",
-        widget=forms.Textarea(attrs={'rows': 4}))
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': ('Required unless uvot_mode is 0x9999 (Filter of the Day).'
+                            ' If you are not sure what filter mode to use, explain what you want here in words.')}
+        ),
+    )
 
     slew_in_place = forms.BooleanField(
         required=False,
