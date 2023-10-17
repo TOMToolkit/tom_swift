@@ -103,12 +103,17 @@ SWIFT_TARGET_CLASSIFICATION_CHOICES = [
 # Note that:
 # >>> TOO().obs_types
 # ['Spectroscopy', 'Light Curve', 'Position', 'Timing']
-SWIFT_OBSERVATION_TYPE_CHOICES = [
-    ('Spectroscopy', 'Spectroscopy'),
-    ('Light Curve', 'Light Curve'),
-    ('Position', 'Position'),
-    ('Timing', 'Timing'),
-]
+
+def get_observation_type_choices():
+    """Returns a list of tuples for the observation type choices.
+
+    Since the TOO() object has propperty describing the valid observation types,
+    use that to create the choices list of tuples (e.g. [('Spectroscopy', 'Spectroscopy'), ('Light Curve', 'Light Curve'), ...]).
+    """
+    observation_type_choices = []
+    for obs_type in TOO().obs_types:
+        observation_type_choices.append((obs_type, obs_type))
+    return observation_type_choices
 
 #
 # Instruments

@@ -13,10 +13,10 @@ from tom_targets.models import Target
 from tom_swift import __version__
 from tom_swift.swift_api import (SwiftAPI,
                                  SWIFT_INSTRUMENT_CHOICES,
-                                 SWIFT_OBSERVATION_TYPE_CHOICES,
                                  SWIFT_TARGET_CLASSIFICATION_CHOICES,
                                  SWIFT_URGENCY_CHOICES,
-                                 SWIFT_XRT_MODE_CHOICES)
+                                 SWIFT_XRT_MODE_CHOICES,
+                                 get_observation_type_choices,
                                  get_monitoring_unit_choices,)
 
 logger = logging.getLogger(__name__)
@@ -91,9 +91,8 @@ class SwiftObservationForm(BaseObservationForm):
     obs_type = forms.ChoiceField(
         required=True,
         label='Observation Type',
-        choices=SWIFT_OBSERVATION_TYPE_CHOICES,
-        help_text='What is driving the exposure time?',
-        initial=SWIFT_OBSERVATION_TYPE_CHOICES[0])
+        choices=get_observation_type_choices(),
+        help_text='What is driving the exposure time?')
 
     #
     # Description of the source brightness for various instruments
