@@ -739,42 +739,26 @@ class SwiftFacility(BaseObservationFacility):
         #for property in too_status_properties:
         #    logger.debug(f'submit_observation - too.status.{property}: {getattr(self.swift_api.too.status, property)}')
 
+        too_id = None
         if self.swift_api.too.status.status == 'Accepted':
+            too_id = self.swift_api.too.status.too_id
             # this was a successful submission
             logger.info(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
-            logger.info(f'submit_observation - too.status.too_id: {self.swift_api.too.status.too_id}')
+            logger.info(f'submit_observation - too_id: {too_id}')
 
             # lets examine the TOO created
-            # TODO: move this code into swift_api.py
             # see https://www.swift.psu.edu/too_api/index.php?md=Swift TOO Request Example Notebook.ipynb
 
             if self.swift_api.too.debug:
                 # this was a debug submission and thus, no TOO was made and
                 # the too_id returned in the too.status is points to nothing.
-                pass
-                logger.info((f'submit_observation - DEBUG submission - too_id'
-                             f' {self.swift_api.too.status.too_id} is not real.'))
-            else:
-                # TODO: it's unclear if we really need to ask for the TOORequests object
-                # for this too at this point....
-
-                # configure the request object
-                self.swift_api.too_request.username = self.swift_api.too.username
-                self.swift_api.too_request.shared_secret = self.swift_api.too.shared_secret
-                self.swift_api.too_request.detail = True
-                self.swift_api.too_request.too_id = self.swift_api.too.status.too_id
-                too_request_response = self.swift_api.too_request.submit()
-
-                if too_request_response:
-                    logger.debug(f'submit_observation - too_request[0]: {self.swift_api.too_request[0]}')
-                else:
-                    logger.error(f'submit_observation - too_request_response: {too_request_response}')
+                logger.warning((f'submit_observation - DEBUG submission - too_id: {too_id} is not real.'))
         else:
             logger.error(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
 
         # TODO: remove this -- it is only for debugging/development
         #self.swift_api.too.status.too_id = 19529 # an actual NCG1566 TOO
 
-        return [self.swift_api.too.status.too_id]
+        return [too_id]
 
 
