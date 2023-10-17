@@ -344,7 +344,6 @@ class SwiftObservationForm(BaseObservationForm):
         # of the swifttoolkit.Swift_TOO object (unless we want to maintain a a mapping between
         # the two). NB: field can be None.
         #
-        logger.debug(f'SwiftObservationForm.is_valid -- fields: {self.fields.keys()}')
         errors: [] = observation_module().validate_observation(observation_payload)
 
         if errors:
@@ -436,32 +435,47 @@ class SwiftFacility(BaseObservationFacility):
 
     def all_data_products(self, observation_record):
         data_products = super().all_data_products(observation_record)
-        logger.debug('all_data_products: {data_products}}')
-        raise NotImplementedError('SwiftFacility.all_data_products not yet implemented')
+        logger.debug(f'all_data_products: {data_products}')
+        # TODO: right now we just extend this to log a debug message. So remove this
+        # and just let the super class method handle it, when we're finished developing.
         return data_products
 
-    def data_products(self, observation_id, product_id):
-        # TODO: this is from the BaseRoboticObservationFacility class 
-        #       not sure if it's needed here
+    def data_products(self, observation_id, product_id=None):
         logger.debug('data_products')
-        raise NotImplementedError('SwiftFacility.data_products not yet implemented')
+        # TODO: how do we get data products from Swift?
+        return []
 
     def get_observation_status(self):
         logger.debug('get_observation_status')
         raise NotImplementedError('SwiftFacility.get_observation_status not yet implemented')
 
-    def get_observation_url(self):
+    def get_observation_url(self, observation_id):
+        """
+        """
         logger.debug('get_observation_url')
-        raise NotImplementedError('SwiftFacility.get_observation_url not yet implemented')
+        return 'SwiftFacility.get_observation_url()'
 
     def get_observing_sites(self):
+        """Normally this would return an iterable dictionary of site LAT,LON,ELV values
+        to be used for target visibiliy window calculations. See, for example,
+        tom_base/tom_observations/facilities/ocs.py::OCSSettings.get_sites()
+
+        Swift is entirely different. Just return and empty dict for now.
+        """
         logger.debug('get_observing_sites')
-        raise NotImplementedError('SwiftFacility.get_observing_sites not yet implemented')
-        return super().get_observing_sites()
+        return {}
 
     def get_terminal_observing_states(self):
-        logger.debug('get_terminal_observing_states')
-        raise NotImplementedError('SwiftFacility.get_terminal_observing_states not yet implemented')
+        """
+        """
+        # super().get_terminal_observing_states() returns None
+        # TODO: this just a made-up list of states. Find out what the real states are.
+        terminal_states = ['Completed', 'Failed', 'Canceled']
+
+        logger.warning(f'get_terminal_observing_states - (FAKE!) terminal_states: {terminal_states}')
+
+        return terminal_states
+
 
 
     def _configure_too(self, observation_payload):
@@ -633,11 +647,15 @@ class SwiftFacility(BaseObservationFacility):
         too_is_valid = self.swift_api.too.validate()
         logger.debug(f'validate_observation response: {too_is_valid}')
 
-        if too_is_valid:
-            # if the too was internally valid, now validate with the server
-            logger.debug(f'validate_observation - calling too.server_validate()')
-            too_is_server_valid = self.swift_api.too.server_validate()
-        
+        # TODO: at the moment, too.server_validate() is timing out, so by-pass this
+        # while we proceed with development.
+        #if too_is_valid:
+        #    # if the too was internally valid, now validate with the server
+        #    logger.debug(f'validate_observation - calling too.server_validate()')
+        #    too_is_server_valid = self.swift_api.too.server_validate()
+        too_is_server_valid = True # in lieu of calling too.server_validate()
+
+
         #logger.debug(f'validate_observation - too.status: {self.swift_api.too.status}')
         ##logger.debug(f'validate_observation - dir(too.status): {dir(self.swift_api.too.status)}')
         #too_status_properties_removed = [
@@ -684,12 +702,13 @@ class SwiftFacility(BaseObservationFacility):
         if not self.swift_api.too.debug:
             # while in development, exit early if we're not in debug mode. (i.e. don't submit).
             logger.warning(f'submit_observation - Skipping ACTUAL submission!!! too.debug: {self.swift_api.too.debug}'
-                           f'Even though, in the form Debug is {self.swift_api.too.debug}, it is being reset'
-                           f'too True before we call too.submit()')
+                           f' Even though, in the form, Debug is {self.swift_api.too.debug}, it is being reset'
+                           f' to True before we call too.submit()')
             self.swift_api.too.debug = True
-            return []
 
+        logger.debug(f'calling too.submit()')
         self.swift_api.too.submit()
+        logger.debug(f'too.submit() returned')
 
         logger.info(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
         logger.info(f'submit_observation - too.status.errors: {self.swift_api.too.status.errors}')
@@ -718,20 +737,33 @@ class SwiftFacility(BaseObservationFacility):
             # TODO: move this code into swift_api.py
             # see https://www.swift.psu.edu/too_api/index.php?md=Swift TOO Request Example Notebook.ipynb
 
-            # configure the request object
-            self.swift_api.too_request.username = self.swift_api.too.username
-            self.swift_api.too_request.shared_secret = self.swift_api.too.shared_secret
-            self.swift_api.too_request.detail = True
-            self.swift_api.too_request.too_id = self.swift_api.too.status.too_id
-            too_request_response = self.swift_api.too_request.submit()
-
-            if too_request_response:
-                logger.debug(f'submit_observation - too_request[0]: {self.swift_api.too_request[0]}')
+            if self.swift_api.too.debug:
+                # this was a debug submission and thus, no TOO was made and
+                # the too_id returned in the too.status is points to nothing.
+                pass
+                logger.info((f'submit_observation - DEBUG submission - too_id'
+                             f' {self.swift_api.too.status.too_id} is not real.'))
             else:
-                logger.error(f'submit_observation - too_request_response: {too_request_response}')
+                # TODO: it's unclear if we really need to ask for the TOORequests object
+                # for this too at this point....
+
+                # configure the request object
+                self.swift_api.too_request.username = self.swift_api.too.username
+                self.swift_api.too_request.shared_secret = self.swift_api.too.shared_secret
+                self.swift_api.too_request.detail = True
+                self.swift_api.too_request.too_id = self.swift_api.too.status.too_id
+                too_request_response = self.swift_api.too_request.submit()
+
+                if too_request_response:
+                    logger.debug(f'submit_observation - too_request[0]: {self.swift_api.too_request[0]}')
+                else:
+                    logger.error(f'submit_observation - too_request_response: {too_request_response}')
         else:
             logger.error(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
 
-        return []
+        # TODO: remove this -- it is only for debugging/development
+        self.swift_api.too.status.too_id = 19529 # an actual NCG1566 TOO
+
+        return [self.swift_api.too.status.too_id]
 
 
