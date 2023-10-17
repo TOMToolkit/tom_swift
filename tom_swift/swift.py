@@ -17,6 +17,7 @@ from tom_swift.swift_api import (SwiftAPI,
                                  SWIFT_TARGET_CLASSIFICATION_CHOICES,
                                  SWIFT_URGENCY_CHOICES,
                                  SWIFT_XRT_MODE_CHOICES)
+                                 get_monitoring_unit_choices,)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -155,8 +156,11 @@ class SwiftObservationForm(BaseObservationForm):
         help_text=('If number of visits more than one change next exposure'
                    'time per visit and monitoring frequency, otherwise leave blank.'),
         initial=1)
-    monitoring_freq = forms.CharField(required=False, label='Frequency of visits')
-    # TODO: only expose exp_time_per_visit if monitoring freqency is > 1
+    monitoring_freq = forms.IntegerField(required=False, label='Monitoring Frequency', initial=1)
+    monitoring_units = forms.ChoiceField(
+        required=False,
+        choices=get_monitoring_unit_choices(),
+    )
 
     #
     # Swift Guest Investigator program parameters
@@ -296,7 +300,11 @@ class SwiftObservationForm(BaseObservationForm):
                     Div(
                         'num_of_visits',
                         'exp_time_per_visit',
-                        'monitoring_freq',
+                        Div(
+                            Div(Field('monitoring_freq'), css_class='col-md-6',),
+                            Div(Field('monitoring_units'), css_class='col-md-6',),
+                            css_class='row',
+                        ),
                     )
                 ),
                 AccordionGroup('Tiling',
@@ -557,13 +565,14 @@ class SwiftFacility(BaseObservationFacility):
         #
         # Monitoring requests
         #
-        self.swift_api.too.num_of_visits == observation_payload['num_of_visits'] # use assignment expression?
+        self.swift_api.too.num_of_visits = observation_payload['num_of_visits'] # use assignment expression?
         if self.swift_api.too.num_of_visits > 1:
             self.swift_api.too.exp_time_per_visit = observation_payload['exp_time_per_visit']
-            self.swift_api.too.monitoring_freq = observation_payload['monitoring_freq']
-        # TODO: Units for monitoring_freq (days, hours, minutes, seconds, orbits, others, etc.)
-        # TODO: make ChoiceField for valid units (above) and (here) construct the formatted text
-        #       for the monitoring_freq field (e.g. "1 orbit", "2 days", "3 hours", etc.)
+            # construct monitoring_freq from monitoring_freq and monitoring_units e.g '1 hour'
+            self.swift_api.too.monitoring_freq = f"{observation_payload['monitoring_freq']} {observation_payload['monitoring_units']}"
+        else:
+            self.swift_api.too.exp_time_per_visit = None
+            self.swift_api.too.monitoring_freq = None
 
         #
         # Swift Guest Investigator program parameters

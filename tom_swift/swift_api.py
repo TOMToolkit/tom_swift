@@ -142,8 +142,6 @@ SWIFT_XRT_MODE_CHOICES = [
     #(9, "Bias"),
 ]
 
-
-
 #
 # UVOT Modes
 #
@@ -156,3 +154,16 @@ SWIFT_XRT_MODE_CHOICES = [
 # Any string will validate:
 # >>> too.uvot_mode = "I think I want all UV filters for this, whatever the UVOT team recommends."
 
+#
+# Monitoring
+#
+def get_monitoring_unit_choices():
+    """Returns a list of tuples for the monitoring frequency unit choices.
+
+    Since the TOO() object has propperty describing the valid monitoring frequency units,
+    use that to create the choices list of tuples (e.g. [('day', 'day'), ('week', 'week'), ...]).
+    """
+    monitoring_unit_choices = []
+    for unit in TOO().monitoring_units:
+        monitoring_unit_choices.append((unit, unit))
+    return monitoring_unit_choices
