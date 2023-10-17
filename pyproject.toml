@@ -10,9 +10,9 @@ packages = [{include = "tom_swift"}]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
-tomtoolkit = "^2.10"
-BatAnalysis = "^1.0.2"
-django-crispy-forms = "^1"
+tomtoolkit = "^2.14"
+BatAnalysis = "^1.0"
+django-crispy-forms = "^2"
 
 
 [tool.poetry-dynamic-versioning]

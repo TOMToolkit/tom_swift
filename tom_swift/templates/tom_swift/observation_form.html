@@ -1,0 +1,196 @@
+{% extends 'tom_common/base.html' %}
+{% load bootstrap4 static crispy_forms_tags observation_extras targets_extras %}
+{% block title %}Submit Observation{% endblock %}
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'tom_common/css/main.css' %}">
+<link rel="stylesheet" href="{% static 'tom_observations/css/main.css' %}">
+{% endblock %}
+{% block content %}
+
+<script>
+function showHideTargetClassificationFields() {
+    const target_classification = document.getElementById('id_target_classification_choices').options[document.getElementById('id_target_classification_choices').selectedIndex].value;
+    switch (target_classification) {
+        case 'Other (please specify)':
+            // in this case show the target_classification CharField
+            document.getElementById('div_id_target_classification').style.display = '';
+            // and hide the grb_detector and grb_triggertime fields
+            document.getElementById('div_id_grb_detector').style.display = 'none';
+            document.getElementById('div_id_grb_triggertime').style.display = 'none';
+            break;
+        case 'GRB':
+            // in this case show the grb_detector and grb_triggertime fields
+            document.getElementById('div_id_grb_detector').style.display = '';
+            document.getElementById('div_id_grb_triggertime').style.display = '';
+            // and hide the target_classification CharField
+            document.getElementById('div_id_target_classification').style.display = 'none';
+            break;
+        default:
+            // in this case hide all the extra fields
+            document.getElementById('div_id_target_classification').style.display = 'none';
+            document.getElementById('div_id_grb_detector').style.display = 'none';
+            document.getElementById('div_id_grb_triggertime').style.display = 'none';
+            break;
+    }
+};
+
+function showHideMonitoringFields() {
+    const num_of_visits = document.getElementById('id_num_of_visits').value;
+    if (num_of_visits > 1) {
+        // show the monitoring fields
+        document.getElementById('div_id_exp_time_per_visit').style.display = '';
+        document.getElementById('div_id_monitoring_freq').style.display = '';
+    } else {
+        // hide the monitoring fields
+        document.getElementById('div_id_exp_time_per_visit').style.display = 'none';
+        document.getElementById('div_id_monitoring_freq').style.display = 'none';
+    }
+};
+
+function showHideInstrumentModeFields() {
+    const inst = document.getElementById('id_instrument').options[document.getElementById('id_instrument').selectedIndex].value;
+    switch (inst) {
+        case 'XRT':
+            console.log('XRT instrument selected');
+            // show the xrt_mode field; hide the UVOT fields
+            document.getElementById('div_id_xrt_mode').style.display = '';
+            document.getElementById('div_id_uvot_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_just').style.display = 'none';
+            break;
+        case 'UVOT':
+            console.log('UVOT instrument selected');
+            // show the uvot_mode and uvot_just fields; hide the xrt_mode fields
+            document.getElementById('div_id_uvot_mode').style.display = '';
+            document.getElementById('div_id_uvot_just').style.display = '';
+            document.getElementById('div_id_xrt_mode').style.display = 'none';
+            break;
+        case 'BAT':
+            console.log('BAT instrument selected');
+            // not sure what to show or hide here (hide everything?)
+            document.getElementById('div_id_xrt_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_just').style.display = 'none';
+            break;
+    }
+};
+
+function showHideTilingFields() {
+    if (document.getElementById('id_tiling').checked) {
+        console.log('tiling selected')
+        // show the tiling fields
+        document.getElementById('div_id_number_of_tiles').style.display = '';
+        document.getElementById('div_id_exposure_time_per_tile').style.display = '';
+        document.getElementById('div_id_tiling_justification').style.display = '';
+    } else {
+        console.log('tiling not selected')
+        // hide the tiling fields
+        document.getElementById('div_id_number_of_tiles').style.display = 'none';
+        document.getElementById('div_id_exposure_time_per_tile').style.display = 'none';
+        document.getElementById('div_id_tiling_justification').style.display = 'none';
+    }
+};
+
+function showHideSwiftGIProposalFields() {
+    if (document.getElementById('id_proposal').checked) {
+        console.log('proposal selected')
+        // show the proposal fields
+        document.getElementById('div_id_proposal_id').style.display = '';
+        document.getElementById('div_id_proposal_pi').style.display = '';
+        document.getElementById('div_id_proposal_trigger_just').style.display = '';
+    } else {
+        console.log('proposal not selected')
+        // hide the proposal fields
+        document.getElementById('div_id_proposal_id').style.display = 'none';
+        document.getElementById('div_id_proposal_pi').style.display = 'none';
+        document.getElementById('div_id_proposal_trigger_just').style.display = 'none';
+    }
+};
+
+</script>
+
+<script type="text/javascript">
+    window.addEventListener("load", showHideTargetClassificationFields);
+    window.addEventListener("load", showHideMonitoringFields);
+    window.addEventListener("load", showHideInstrumentModeFields);
+    window.addEventListener("load", showHideTilingFields);
+    window.addEventListener("load", showHideSwiftGIProposalFields);
+</script>
+<!-- see also script element at end of file -->
+
+{{ form|as_crispy_errors }}
+<h1>Submit Request to Neil Gehrels Swift Observatory</h1>
+
+
+{% if target.type == 'SIDEREAL' %}
+<div class="row">
+    <div class="col">
+        <p>This is where we might put some visibility windows.</p>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <!-- Column 1 -->
+    <div class="col-md-4">
+        <p><b>Submitting credential:</b> <em>{{ username }}</em></p>
+        <hr>
+        <h4>Target Information</h4>
+        {% target_data target %}
+        <hr>
+        <h4>Resolved Target Information ({{ resolver }})</h4>
+        <dl class="row">
+            <dt class="col-sm-6">Resolved Name</dt>
+            <dd class="col-sm-6">{{ resolved_target_name }}</dd>
+            <dt class="col-sm-6">Right Ascension</dt>
+            <dd class="col-sm-6">{{ resolved_target_ra|floatformat:4 }}</dd>
+            <dt class="col-sm-6">Declination</dt>
+            <dd class="col-sm-6">{{ resolved_target_dec|floatformat:4 }}</dd>
+        </dl>
+        <hr>
+        <!-- display tom_swift Facility verison -->
+        <p><em>TOM Toolit Facility (<a href="https://github.com/TOMToolkit/tom_swift">tom_swift</a>) version {{ version }}</em></p>
+    </div>
+    <!-- Column 2 -->
+    <div class="col-md-6">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" id="tabs">
+        {% for observation_type, observation_form in observation_type_choices %}
+            <li class="nav-item">
+                <span class="nav-link {% if observation_type == active or not active and forloop.first %}active{% endif %}" data-target="#{{ observation_type }}" data-toggle="tab">
+                    {{ observation_type }}
+                </span>
+            </li>
+        {% endfor %}
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content observation-form">
+        {% for observation_type, observation_form in observation_type_choices %}
+            <div class="tab-pane {% if observation_type == active or not active and forloop.first %}active{% endif %}" id="{{ observation_type }}">
+                {% crispy observation_form %}
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- this must at the end or else the elements can't be found and then the eventListener
+     can't be added
+ -->
+<script type="text/javascript">
+    var el1 = document.getElementById("div_id_target_classification_choices");
+    el1.addEventListener("click", showHideTargetClassificationFields);
+
+    var el2 = document.getElementById("div_id_instrument");
+    el2.addEventListener("click", showHideInstrumentModeFields);
+
+    var el3 = document.getElementById("div_id_num_of_visits");
+    el3.addEventListener("click", showHideMonitoringFields);
+
+    var el4 = document.getElementById("div_id_tiling");
+    el4.addEventListener("click", showHideTilingFields);
+
+    var el5 = document.getElementById("div_id_proposal");
+    el5.addEventListener("click", showHideSwiftGIProposalFields);
+</script>
+
+{% endblock %}
