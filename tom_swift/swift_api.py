@@ -42,7 +42,7 @@ class SwiftAPI:
         """
         try:
             username = settings.FACILITIES['SWIFT'].get('SWIFT_USERNAME', 'SWIFT_USERNAME not configured')
-            shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_PASSWORD', 'SWIFT_PASSWORD not configured')
+            shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_SHARED_SECRET', 'SWIFT_SHARED_SECRET not configured')
 
             logger.info(f'swift username: {username}')
         except KeyError as ex:
