@@ -662,14 +662,10 @@ class SwiftFacility(BaseObservationFacility):
         too_is_valid = self.swift_api.too.validate()
         logger.debug(f'validate_observation response: {too_is_valid}')
 
-        # TODO: at the moment, too.server_validate() is timing out, so by-pass this
-        # while we proceed with development.
-        #if too_is_valid:
-        #    # if the too was internally valid, now validate with the server
-        #    logger.debug(f'validate_observation - calling too.server_validate()')
-        #    too_is_server_valid = self.swift_api.too.server_validate()
-        too_is_server_valid = True # in lieu of calling too.server_validate()
-
+        if too_is_valid:
+            # if the too was internally valid, now validate with the server
+            logger.debug(f'validate_observation - calling too.server_validate()')
+            too_is_server_valid = self.swift_api.too.server_validate()
 
         #logger.debug(f'validate_observation - too.status: {self.swift_api.too.status}')
         ##logger.debug(f'validate_observation - dir(too.status): {dir(self.swift_api.too.status)}')
