@@ -762,7 +762,7 @@ class SwiftFacility(BaseObservationFacility):
             logger.error(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
 
         # TODO: remove this -- it is only for debugging/development
-        self.swift_api.too.status.too_id = 19529 # an actual NCG1566 TOO
+        #self.swift_api.too.status.too_id = 19529 # an actual NCG1566 TOO
 
         return [self.swift_api.too.status.too_id]
 
