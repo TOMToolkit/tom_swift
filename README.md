@@ -1,5 +1,5 @@
 # tom_swift
-_Note: This repository is under active development. It is a not-yet-functional, work in progress._
+_Note: This repository is under active development. It is currently in alpha-release stage. Feedback is welcome._
 
 [Neil Gehrels Swift Observatory](https://swift.gsfc.nasa.gov/index.html) facility module for TOM Toolkit. This module uses the
 [Swift TOO API](https://www.swift.psu.edu/too_api/) for all its interactions with the _Swift_ Observatory. When installed and
