@@ -82,7 +82,7 @@ class SwiftObservationForm(BaseObservationForm):
         initial=SWIFT_URGENCY_CHOICES[2])
 
     #
-    # Observation Type ('Specroscopy', 'Light Curve', 'Position', 'Timing')
+    # Observation Type ('Spectroscopy', 'Light Curve', 'Position', 'Timing')
     #
     obs_type = forms.ChoiceField(
         required=True,
@@ -134,7 +134,7 @@ class SwiftObservationForm(BaseObservationForm):
         required=False, label='Science Justification',
         widget=forms.Textarea(attrs={
             'rows': 8,
-            'placeholder': 'A pursuasive paragraph or two explaining why this object requires rapid observation.'})
+            'placeholder': 'A persuasive paragraph or two explaining why this object requires rapid observation.'})
         )
 
     #
@@ -151,7 +151,7 @@ class SwiftObservationForm(BaseObservationForm):
     #
     # Monitoring requests
     #
-    exp_time_per_visit = forms.FloatField(required=False, label='Exposure time per visit(s) [s]')
+    exp_time_per_visit = forms.FloatField(required=False, label='Exposure time per visit [s]')
     num_of_visits = forms.IntegerField(
         required=False,
         label='Number of visits [integer]',
@@ -349,8 +349,8 @@ class SwiftObservationForm(BaseObservationForm):
         # validate_observation needs to return a list of (field, error) tuples
         # if the list is empty, then the observation is valid
         #
-        # in order to call self.add_error(field, error), the field given must match the
-        # a field declared on the Form, Thus, the form field names must match the properties
+        # in order to call self.add_error(field, error), the field given must match a
+        # field declared on the Form, thus the form field names must match the properties
         # of the swifttoolkit.Swift_TOO object (unless we want to maintain a mapping between
         # the two). NB: field can be None.
         #
@@ -379,7 +379,7 @@ class SwiftObservationForm(BaseObservationForm):
         plus the target information should be sufficient. See _configure_too() for how
         the observation_payload is used to configure the TOO attributes.
         """
-        # At the moment it's unclear why the obeervation_payload needs to differ from
+        # At the moment it's unclear why the observation_payload needs to differ from
         # the form.cleaned_data...
         payload = self.cleaned_data.copy()  # copy() just to be safe
 
@@ -425,7 +425,7 @@ class SwiftFacility(BaseObservationFacility):
             'username': username,
         }
 
-        # get the resovled target info from the SwiftAPI
+        # get the resolved target info from the SwiftAPI
         target = kwargs['target']
         resolved_target = self.swift_api.resolve_target(target)
         if resolved_target:
@@ -447,7 +447,7 @@ class SwiftFacility(BaseObservationFacility):
         data_products = super().all_data_products(observation_record)
         logger.debug(f'all_data_products: {data_products}')
         # TODO: right now we just extend this to log a debug message. So remove this
-        # and just let the super class method handle it, when we're finished developing.
+        #  and just let the super class method handle it, when we're finished developing.
         return data_products
 
     def data_products(self, observation_id, product_id=None):
@@ -467,7 +467,7 @@ class SwiftFacility(BaseObservationFacility):
 
     def get_observing_sites(self):
         """Normally this would return an iterable dictionary of site LAT,LON,ELV values
-        to be used for target visibiliy window calculations. See, for example,
+        to be used for target visibility window calculations. See, for example,
         tom_base/tom_observations/facilities/ocs.py::OCSSettings.get_sites()
 
         Swift is entirely different. Just return and empty dict for now.
@@ -746,12 +746,12 @@ class SwiftFacility(BaseObservationFacility):
 
             if self.swift_api.too.debug:
                 # this was a debug submission and thus, no TOO was made and
-                # the too_id returned in the too.status is points to nothing.
+                # the too_id returned in the too.status points to nothing.
                 logger.warning(f'submit_observation - DEBUG submission - too_id: {too_id} is not real.')
         else:
             logger.error(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
 
-        #  TODO: remove this -- it is only for debugging/development
+        # TODO: remove this -- it is only for debugging/development
         #  self.swift_api.too.status.too_id = 19529 #  an actual NCG1566 TOO
 
         return [too_id]

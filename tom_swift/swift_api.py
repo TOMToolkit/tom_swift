@@ -27,7 +27,7 @@ logger.setLevel(logging.INFO)
 class SwiftAPI:
     """This is the interface between the SwiftFacility and the swifttools.swift_too classes.
 
-    This keeps the SwiftFacility class focued on implementing it's super class methods and separates
+    This keeps the SwiftFacility class focused on implementing its superclass methods and separates
     the SwiftFacility from the swifttools.swift_too classes.
     """
     def __init__(self, debug=True):
@@ -96,18 +96,17 @@ SWIFT_TARGET_CLASSIFICATION_CHOICES = [
     ('Other (please specify)', 'Other (please specify)'),
 ]
 
+
 #
 # Observation Types
 #
 # Note that:
 # >>> TOO().obs_types
 # ['Spectroscopy', 'Light Curve', 'Position', 'Timing']
-
-
 def get_observation_type_choices():
     """Returns a list of tuples for the observation type choices.
 
-    Since the TOO() object has propperty describing the valid observation types,
+    Since the TOO() object has property describing the valid observation types,
     use that to create the choices list of tuples (e.g. [('Spectroscopy', 'Spectroscopy'), ('Light Curve',
     'Light Curve'), ...]).
     """
@@ -153,7 +152,7 @@ SWIFT_XRT_MODE_CHOICES = [
 # UVOT Modes
 #
 
-# >>> too.uvot_mode = 0x01AB  # Assign too.uvot_mode as a Hexidecimal number:
+# >>> too.uvot_mode = 0x01AB  # Assign too.uvot_mode as a Hexadecimal number:
 # >>> too.uvot_mode  # It's reported as a Hex string:
 # '0x01ab'
 # >>> type(too.uvot_mode)
@@ -168,7 +167,7 @@ SWIFT_XRT_MODE_CHOICES = [
 def get_monitoring_unit_choices():
     """Returns a list of tuples for the monitoring frequency unit choices.
 
-    Since the TOO() object has propperty describing the valid monitoring frequency units,
+    Since the TOO() object has property describing the valid monitoring frequency units,
     use that to create the choices list of tuples (e.g. [('day', 'day'), ('week', 'week'), ...]).
     """
     monitoring_unit_choices = []
