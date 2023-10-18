@@ -1,10 +1,8 @@
 import logging
 
-from crispy_forms.layout import Layout, Div, Field, Row, HTML
+from crispy_forms.layout import Layout, Div, Field
 from crispy_forms.bootstrap import Accordion, AccordionGroup
 from django import forms
-from django.conf import settings
-from django.contrib import messages # not sure if we can do this outside of a View
 from django.utils.safestring import mark_safe
 
 from tom_observations.facility import BaseObservationForm, BaseObservationFacility, get_service_class
@@ -47,7 +45,7 @@ class SwiftObservationForm(BaseObservationForm):
     # source_name, ra, dec are not part of the form
 
     # see tom_swift/templates/tom_swift/observation_form.html for javascript
-    # that displays/hides the target_classification ChoiceField if "Other (please specify)""
+    # that displays/hides the target_classification ChoiceField if "Other (please specify)"
     # is chosen in the target_classification_choices drop-down menu widget.
     target_classification_choices = forms.ChoiceField(
         required=True,
@@ -84,7 +82,7 @@ class SwiftObservationForm(BaseObservationForm):
         initial=SWIFT_URGENCY_CHOICES[2])
 
     #
-    # Observation Type ('Specroscopy', 'Light Curve', 'Position', 'Timing')
+    # Observation Type ('Spectroscopy', 'Light Curve', 'Position', 'Timing')
     #
     obs_type = forms.ChoiceField(
         required=True,
@@ -97,7 +95,8 @@ class SwiftObservationForm(BaseObservationForm):
     #
     # TODO: validation - answer at least one of these questions
     optical_magnitude = forms.FloatField(required=False, label='Optical Magnitude')
-    optical_filter = forms.CharField(required=False, help_text='What filter was the optical magnitude measured in?', initial='u')
+    optical_filter = forms.CharField(required=False, help_text='What filter was the optical magnitude measured in?',
+                                     initial='u')
     xrt_countrate = forms.FloatField(required=False, label='XRT Count Rate [counts/second]')
     bat_countrate = forms.FloatField(required=False, label='BAT Count Rate [counts/second]')
     other_brightness = forms.CharField(
@@ -117,7 +116,7 @@ class SwiftObservationForm(BaseObservationForm):
     grb_triggertime = forms.DateTimeField(
         required=False,
         label='GRB Trigger Date/Time',
-        widget=forms.DateTimeInput) # TODO: finish this
+        widget=forms.DateTimeInput)  # TODO: finish this
     # TODO: validate: required if target_classification is GRB
     # TODO: make the widget nice
 
@@ -128,20 +127,20 @@ class SwiftObservationForm(BaseObservationForm):
         required=False, label='Immediate Objective',
         widget=forms.Textarea(attrs={
             'rows': 2,
-            'placeholder' : 'One sentence explanation of this TOO request.'})
+            'placeholder': 'One sentence explanation of this TOO request.'})
         )
 
     science_just = forms.CharField(
         required=False, label='Science Justification',
         widget=forms.Textarea(attrs={
             'rows': 8,
-            'placeholder' : 'A pursuasive paragraph or two explaining why this object requires rapid observation.'})
+            'placeholder': 'A persuasive paragraph or two explaining why this object requires rapid observation.'})
         )
 
     #
     # Exposure requested time (total)
     #
-    exposure = forms.FloatField(required=False, label='Exposure time requested [s]',initial=500)
+    exposure = forms.FloatField(required=False, label='Exposure time requested [s]', initial=500)
     exp_time_just = forms.CharField(
         required=False, label='Exposure Time Justification',
         widget=forms.Textarea(attrs={
@@ -152,8 +151,8 @@ class SwiftObservationForm(BaseObservationForm):
     #
     # Monitoring requests
     #
-    exp_time_per_visit = forms.FloatField(required=False, label='Exposure time per visit(s) [s]')
-    num_of_visits= forms.IntegerField(
+    exp_time_per_visit = forms.FloatField(required=False, label='Exposure time per visit [s]')
+    num_of_visits = forms.IntegerField(
         required=False,
         label='Number of visits [integer]',
         help_text=('If number of visits is more than one, then complete exposure'
@@ -182,8 +181,8 @@ class SwiftObservationForm(BaseObservationForm):
         required=False,
         label='XRT mode',
         choices=SWIFT_XRT_MODE_CHOICES,
-        coerce=int, # convert the string '6' to int 6
-        initial=6) # Windowed Timing (WT))
+        coerce=int,  # convert the string '6' to int 6
+        initial=6)  # Windowed Timing (WT))
 
     uvot_mode = forms.CharField(
         required=False,
@@ -193,8 +192,8 @@ class SwiftObservationForm(BaseObservationForm):
                              ' See <a target=_blank'
                              ' href=https://www.swift.psu.edu/operations/mode_lookup.php>'
                              'UVOT Mode Lookup Tool</a>'
-                            )),
-    ) # 0x9999 is the "Filter of the Day" and does not require justification
+                             )),
+    )  # 0x9999 is the "Filter of the Day" and does not require justification
 
     # required unless uvot_mode is 0x9999 (Filter of the Day)
     uvot_just = forms.CharField(
@@ -250,88 +249,85 @@ class SwiftObservationForm(BaseObservationForm):
         }),
     )
 
-
     #
     # Debug parameter
     #
     debug = forms.BooleanField(required=False, label='Debug', initial=True)
-
-
 
     def layout(self):
         layout = Layout(
             'urgency',
             Accordion(
                 AccordionGroup('Target Information',
-                'target_classification_choices',
-                'target_classification',
-                'grb_detector',
-                'grb_triggertime',
-                'poserr',
-                ),
+                               'target_classification_choices',
+                               'target_classification',
+                               'grb_detector',
+                               'grb_triggertime',
+                               'poserr',
+                               ),
                 AccordionGroup('Science Justification',
-                    Div(
-                        'immediate_objective',
-                        'science_just',
-                    )
-                ),
+                               Div(
+                                   'immediate_objective',
+                                   'science_just',
+                               )
+                               ),
                 AccordionGroup('Instrument Information',
-                    Div(
-                        Div(# this div is to put instrument drop-down and slew_in_place checkbox
-                            # side-by-side in the same row
-                            Div(Field('instrument'), css_class='col-md-6',),
-                            Div(Field('slew_in_place'), css_class='col-md-6',),
-                            css_class='row',
-                        ),
-                        'xrt_mode',
-                        'uvot_mode',
-                        'uvot_just',
-                    ),
-                ),
+                               Div(
+                                   Div(  # this div is to put instrument drop-down and slew_in_place checkbox
+                                         # side-by-side in the same row
+                                       Div(Field('instrument'), css_class='col-md-6',),
+                                       Div(Field('slew_in_place'), css_class='col-md-6',),
+                                       css_class='row',
+                                   ),
+                                   'xrt_mode',
+                                   'uvot_mode',
+                                   'uvot_just',
+                               ),
+                               ),
                 AccordionGroup('Source Brightness',
-                    Div(
-                        'obs_type',
-                        'optical_magnitude',
-                        'optical_filter',
-                        'xrt_countrate',
-                        'bat_countrate',
-                        'other_brightness',
-                    ),
-                ),
+                               Div(
+                                   'obs_type',
+                                   'optical_magnitude',
+                                   'optical_filter',
+                                   'xrt_countrate',
+                                   'bat_countrate',
+                                   'other_brightness',
+                               ),
+                               ),
                 AccordionGroup('Exposure Information',
-                    Div(
-                        'exposure',
-                        'exp_time_just',
-                    ),
-                    Div(
-                        'num_of_visits',
-                        'exp_time_per_visit',
-                        Div(
-                            Div(Field('monitoring_freq'), css_class='col-md-6',),
-                            Div(Field('monitoring_units'), css_class='col-md-6',),
-                            css_class='row',
-                        ),
-                    )
-                ),
+                               Div(
+                                   'exposure',
+                                   'exp_time_just',
+                               ),
+                               Div(
+                                   'num_of_visits',
+                                   'exp_time_per_visit',
+                                   Div(
+                                       Div(Field('monitoring_freq'), css_class='col-md-6',),
+                                       Div(Field('monitoring_units'), css_class='col-md-6',),
+                                       css_class='row',
+                                   ),
+                               )
+                               ),
                 AccordionGroup('Tiling',
-                    Div(
-                        'tiling',
-                        'number_of_tiles',
-                        'exposure_time_per_tile',
-                        'tiling_justification',
-                    )
-                ),
+                               Div(
+                                   'tiling',
+                                   'number_of_tiles',
+                                   'exposure_time_per_tile',
+                                   'tiling_justification',
+                               )
+                               ),
                 AccordionGroup('Swift Guest Investigator',
-                    Div(
-                        'proposal',
-                        'proposal_id',
-                        'proposal_pi',
-                        'proposal_trigger_just',
-                    )
-                ),
+                               Div(
+                                   'proposal',
+                                   'proposal_id',
+                                   'proposal_pi',
+                                   'proposal_trigger_just',
+                               )
+                               ),
             ),
             'debug'
-        ) # end layout
+        )  # end layout
 
         return layout
 
@@ -341,7 +337,7 @@ class SwiftObservationForm(BaseObservationForm):
         This method is called by the view's form_valid() method.
         """
         # TODO: check validity of doc-string
-        super().is_valid() # this adds cleaned_data to the form instance
+        super().is_valid()  # this adds cleaned_data to the form instance
         logger.debug(f'SwiftObservationForm.is_valid -- cleaned_data: {self.cleaned_data}')
 
         observation_payload = self.observation_payload()
@@ -353,9 +349,9 @@ class SwiftObservationForm(BaseObservationForm):
         # validate_observation needs to return a list of (field, error) tuples
         # if the list is empty, then the observation is valid
         #
-        # in order to call self.add_error(field, error), the field given must match the
-        # a field declared on the Form, Thus, the form field names must match the properties
-        # of the swifttoolkit.Swift_TOO object (unless we want to maintain a a mapping between
+        # in order to call self.add_error(field, error), the field given must match a
+        # field declared on the Form, thus the form field names must match the properties
+        # of the swifttoolkit.Swift_TOO object (unless we want to maintain a mapping between
         # the two). NB: field can be None.
         #
         errors: [] = observation_module().validate_observation(observation_payload)
@@ -365,7 +361,7 @@ class SwiftObservationForm(BaseObservationForm):
             logger.debug(f'SwiftObservationForm.is_valid -- errors: {errors}')
 
         if self._errors:
-            logger.warn(f'Facility submission has errors {self._errors.as_data()}')
+            logger.warning(f'Facility submission has errors {self._errors.as_data()}')
 
         # if add_error has not been called, then a success message will be displayed in the template
         return not self._errors
@@ -383,9 +379,9 @@ class SwiftObservationForm(BaseObservationForm):
         plus the target information should be sufficient. See _configure_too() for how
         the observation_payload is used to configure the TOO attributes.
         """
-        # At the moment it's unclear why the obeervation_payload needs to differ from
+        # At the moment it's unclear why the observation_payload needs to differ from
         # the form.cleaned_data...
-        payload = self.cleaned_data.copy() # copy() just to be safe
+        payload = self.cleaned_data.copy()  # copy() just to be safe
 
         # ...but we need to add the target information because only the target_id is
         # in the form via get_initial().
@@ -429,7 +425,7 @@ class SwiftFacility(BaseObservationFacility):
             'username': username,
         }
 
-        # get the resovled target info from the SwiftAPI
+        # get the resolved target info from the SwiftAPI
         target = kwargs['target']
         resolved_target = self.swift_api.resolve_target(target)
         if resolved_target:
@@ -451,7 +447,7 @@ class SwiftFacility(BaseObservationFacility):
         data_products = super().all_data_products(observation_record)
         logger.debug(f'all_data_products: {data_products}')
         # TODO: right now we just extend this to log a debug message. So remove this
-        # and just let the super class method handle it, when we're finished developing.
+        #  and just let the super class method handle it, when we're finished developing.
         return data_products
 
     def data_products(self, observation_id, product_id=None):
@@ -471,7 +467,7 @@ class SwiftFacility(BaseObservationFacility):
 
     def get_observing_sites(self):
         """Normally this would return an iterable dictionary of site LAT,LON,ELV values
-        to be used for target visibiliy window calculations. See, for example,
+        to be used for target visibility window calculations. See, for example,
         tom_base/tom_observations/facilities/ocs.py::OCSSettings.get_sites()
 
         Swift is entirely different. Just return and empty dict for now.
@@ -489,8 +485,6 @@ class SwiftFacility(BaseObservationFacility):
         logger.warning(f'get_terminal_observing_states - (FAKE!) terminal_states: {terminal_states}')
 
         return terminal_states
-
-
 
     def _configure_too(self, observation_payload):
         """In preparation for calls to self.swift_api.too.validate() and self.swift_api.too.submit(),
@@ -571,11 +565,12 @@ class SwiftFacility(BaseObservationFacility):
         #
         # Monitoring requests
         #
-        self.swift_api.too.num_of_visits = observation_payload['num_of_visits'] # use assignment expression?
+        self.swift_api.too.num_of_visits = observation_payload['num_of_visits']  # use assignment expression?
         if self.swift_api.too.num_of_visits > 1:
             self.swift_api.too.exp_time_per_visit = observation_payload['exp_time_per_visit']
             # construct monitoring_freq from monitoring_freq and monitoring_units e.g '1 hour'
-            self.swift_api.too.monitoring_freq = f"{observation_payload['monitoring_freq']} {observation_payload['monitoring_units']}"
+            self.swift_api.too.monitoring_freq = f"{observation_payload['monitoring_freq']} " \
+                                                 f"{observation_payload['monitoring_units']}"
         else:
             self.swift_api.too.exp_time_per_visit = None
             self.swift_api.too.monitoring_freq = None
@@ -596,7 +591,7 @@ class SwiftFacility(BaseObservationFacility):
             self.swift_api.too.proposal_pi = observation_payload['proposal_pi']
             self.swift_api.too.proposal_trigger_just = observation_payload['proposal_trigger_just']
         else:
-            # just in case there are previously set attributes lingering in the too, reset them
+            # just in case there are previously set attributes lingering in the TOO, reset them
             self.swift_api.too.proposal = False
             self.swift_api.too.proposal_id = None
             self.swift_api.too.proposal_pi = None
@@ -634,7 +629,7 @@ class SwiftFacility(BaseObservationFacility):
             # TODO: validation, if exposure_time_per_tile is unset, position_error should be set
             self.swift_api.too.tiling_justification = observation_payload['tiling_justification']
         else:
-            # just in case there are previously set attributes lingering in the too, reset them
+            # just in case there are previously set attributes lingering in the TOO, reset them
             self.swift_api.too.tiling = False
             self.swift_api.too.number_of_tiles = None
             self.swift_api.too.exposure_time_per_tile = None
@@ -646,7 +641,6 @@ class SwiftFacility(BaseObservationFacility):
         self.swift_api.too.debug = observation_payload['debug']
 
         logger.info(f'SwiftFacility._configure_too - configured too:\n{self.swift_api.too}')
-
 
     def validate_observation(self, observation_payload) -> []:
         """Perform a dry-run of submitting the observation.
@@ -663,30 +657,31 @@ class SwiftFacility(BaseObservationFacility):
         logger.debug(f'validate_observation response: {too_is_valid}')
 
         if too_is_valid:
-            # if the too was internally valid, now validate with the server
-            logger.debug(f'validate_observation - calling too.server_validate()')
+            # if the TOO was internally valid, now validate with the server
+            logger.debug('validate_observation - calling too.server_validate()')
             too_is_server_valid = self.swift_api.too.server_validate()
 
-        #logger.debug(f'validate_observation - too.status: {self.swift_api.too.status}')
-        ##logger.debug(f'validate_observation - dir(too.status): {dir(self.swift_api.too.status)}')
-        #too_status_properties_removed = [
+        #  logger.debug(f'validate_observation - too.status: {self.swift_api.too.status}')
+        #  logger.debug(f'validate_observation - dir(too.status): {dir(self.swift_api.too.status)}')
+        #  too_status_properties_removed = [
         #    'clear', 'submit', 'jwt', 'queue',
         #    'error', 'warning', 'validate',
-        #]
-        #too_status_properties = ['api_data', 'api_name', 'api_version', 'began',
+        #  ]
+        #  too_status_properties = ['api_data', 'api_name', 'api_version', 'began',
         #                         'complete', 'completed', 'errors', 'fetchresult',
         #                         'ignorekeys', 'jobnumber', 'result', 'shared_secret',
         #                         'status', 'submit_url', 'timeout', 'timestamp',
         #                         'too_api_dict', 'too_id', 'username', 'warnings']
         #
-        #for property in too_status_properties:
-        #    logger.debug(f'validate_observation - too.status.{property}: {getattr(self.swift_api.too.status, property)}')
+        #  for property in too_status_properties:
+        #   logger.debug(f'validate_observation - too.status.{property}: {getattr(self.swift_api.too.status,
+        #   property)}')
 
         if not (too_is_valid and too_is_server_valid):
             logger.debug(f'validate_observation - too.status.status: {self.swift_api.too.status.status}')
             logger.debug(f'validate_observation - too.status.errors: {self.swift_api.too.status.errors}')
             logger.debug(f'validate_observation - type(too.status.errors): {type(self.swift_api.too.status.errors)}')
-            
+
             validation_errors = self.swift_api.too.status.errors
 
         return validation_errors
@@ -696,14 +691,14 @@ class SwiftFacility(BaseObservationFacility):
 
         `observation_payload` is the serialized form.cleaned_data
 
-        For the SwiftFacility, sumbitting (or validating) an observation request means
-        instanciating a Swift_TOO object, setting it properties from the observation_payload,
+        For the SwiftFacility, submitting (or validating) an observation request means
+        instantiating a Swift_TOO object, setting it properties from the observation_payload,
         and calling its submit() (or validate()) method. self.too is the Swift_TOO object, whose
-        proerties we need to set.
+        properties we need to set.
 
         returns a list of (field, error) tuples if the observation is invalid
 
-        See https://www.swift.psu.edu/too_api/ for documentation. 
+        See https://www.swift.psu.edu/too_api/ for documentation.
 
         The super class method is absract. No need to call it.
          """
@@ -717,26 +712,26 @@ class SwiftFacility(BaseObservationFacility):
                            f' to True before we call too.submit()')
             self.swift_api.too.debug = True
 
-        logger.debug(f'calling too.submit()')
+        logger.debug('calling too.submit()')
         self.swift_api.too.submit()
-        logger.debug(f'too.submit() returned')
+        logger.debug('too.submit() returned')
 
         logger.info(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
         logger.info(f'submit_observation - too.status.errors: {self.swift_api.too.status.errors}')
 
         logger.debug(f'submit_observation - too.status: {self.swift_api.too.status}')
 
-        #too_status_properties_removed = [
+        #  too_status_properties_removed = [
         #    'clear', 'submit', 'jwt', 'queue',
         #    'error', 'warning', 'validate',
-        #]
-        #too_status_properties = ['api_data', 'api_name', 'api_version', 'began',
+        #  ]
+        #  too_status_properties = ['api_data', 'api_name', 'api_version', 'began',
         #                         'complete', 'completed', 'errors', 'fetchresult',
         #                         'ignorekeys', 'jobnumber', 'result', 'shared_secret',
         #                         'status', 'submit_url', 'timeout', 'timestamp',
         #                         'too_api_dict', 'too_id', 'username', 'warnings']
         #
-        #for property in too_status_properties:
+        #  for property in too_status_properties:
         #    logger.debug(f'submit_observation - too.status.{property}: {getattr(self.swift_api.too.status, property)}')
 
         too_id = None
@@ -746,19 +741,17 @@ class SwiftFacility(BaseObservationFacility):
             logger.info(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
             logger.info(f'submit_observation - too_id: {too_id}')
 
-            # lets examine the TOO created
+            # let's examine the TOO created
             # see https://www.swift.psu.edu/too_api/index.php?md=Swift TOO Request Example Notebook.ipynb
 
             if self.swift_api.too.debug:
                 # this was a debug submission and thus, no TOO was made and
-                # the too_id returned in the too.status is points to nothing.
-                logger.warning((f'submit_observation - DEBUG submission - too_id: {too_id} is not real.'))
+                # the too_id returned in the too.status points to nothing.
+                logger.warning(f'submit_observation - DEBUG submission - too_id: {too_id} is not real.')
         else:
             logger.error(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
 
         # TODO: remove this -- it is only for debugging/development
-        #self.swift_api.too.status.too_id = 19529 # an actual NCG1566 TOO
+        #  self.swift_api.too.status.too_id = 19529 #  an actual NCG1566 TOO
 
         return [too_id]
-
-
