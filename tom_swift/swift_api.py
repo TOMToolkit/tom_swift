@@ -13,7 +13,6 @@ import logging
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-from astropy.coordinates import SkyCoord
 from requests.exceptions import ConnectionError
 
 from swifttools.swift_too import TOO, TOORequests, Resolve
@@ -24,6 +23,7 @@ from tom_targets.models import Target
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 class SwiftAPI:
     """This is the interface between the SwiftFacility and the swifttools.swift_too classes.
 
@@ -33,7 +33,6 @@ class SwiftAPI:
     def __init__(self, debug=True):
         self.too = TOO()
         self.too_request = TOORequests()
-
 
     def get_credentials(self) -> (str, str):
         """returns username and password from settings.py
@@ -49,7 +48,6 @@ class SwiftAPI:
             logger.error(f"'SWIFT' configuration dictionary not defined in settings.FACILITIES")
             raise ImproperlyConfigured
         return username, shared_secret
-
 
     def resolve_target(self, target: Target):
         """
@@ -79,14 +77,14 @@ class SwiftAPI:
 SWIFT_URGENCY_CHOICES = [
     (1, 'Within 4 hours (Wakes up the Swift Observatory Duty Scientist).'),
     (2, 'Within 24 hours'),
-    (3, 'Days to a week'), # default
+    (3, 'Days to a week'),  # default
     (4, 'Week to a month'),
 ]
 
 SWIFT_TARGET_CLASSIFICATION_CHOICES = [
     ('AGN', 'AGN'),
     ('Be Binary System', 'Be Binary System'),
-    ('Comet or Asteroid','Comet or Asteroid'),
+    ('Comet or Asteroid', 'Comet or Asteroid'),
     ('Dwarf Nova', 'Dwarf Nova'),
     ('GRB', 'GRB'),
     ('Nova', 'Nova'),
@@ -104,16 +102,19 @@ SWIFT_TARGET_CLASSIFICATION_CHOICES = [
 # >>> TOO().obs_types
 # ['Spectroscopy', 'Light Curve', 'Position', 'Timing']
 
+
 def get_observation_type_choices():
     """Returns a list of tuples for the observation type choices.
 
     Since the TOO() object has propperty describing the valid observation types,
-    use that to create the choices list of tuples (e.g. [('Spectroscopy', 'Spectroscopy'), ('Light Curve', 'Light Curve'), ...]).
+    use that to create the choices list of tuples (e.g. [('Spectroscopy', 'Spectroscopy'), ('Light Curve',
+    'Light Curve'), ...]).
     """
     observation_type_choices = []
     for obs_type in TOO().obs_types:
         observation_type_choices.append((obs_type, obs_type))
     return observation_type_choices
+
 
 #
 # Instruments
@@ -135,16 +136,16 @@ SWIFT_INSTRUMENT_CHOICES = [
 # are equivalent.
 #
 SWIFT_XRT_MODE_CHOICES = [
-    (0, "Auto"), # picks a mode based on brightness, but if brightness is known, best to pick yourself
-    #(1, "Null"),
-    #(2, "ShortIM"),
-    #(3, "LongIM"),
-    #(4, "PUPD"),
-    #(5, "LRPD"),
+    (0, "Auto"),  # picks a mode based on brightness, but if brightness is known, best to pick yourself
+    # (1, "Null"),
+    # (2, "ShortIM"),
+    # (3, "LongIM"),
+    # (4, "PUPD"),
+    # (5, "LRPD"),
     (6, "Windowed Timing (WT)"),
     (7, "Photon Counting (PC)"),
-    #(8, "Raw"),
-    #(9, "Bias"),
+    # (8, "Raw"),
+    # (9, "Bias"),
 ]
 
 #
@@ -158,6 +159,7 @@ SWIFT_XRT_MODE_CHOICES = [
 # <class 'str'>
 # Any string will validate:
 # >>> too.uvot_mode = "I think I want all UV filters for this, whatever the UVOT team recommends."
+
 
 #
 # Monitoring
