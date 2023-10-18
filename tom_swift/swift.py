@@ -181,7 +181,7 @@ class SwiftObservationForm(BaseObservationForm):
         required=False,
         label='XRT mode',
         choices=SWIFT_XRT_MODE_CHOICES,
-        coerce=int, # convert the string '6' to int 6
+        coerce=int,  # convert the string '6' to int 6
         initial=6)  # Windowed Timing (WT))
 
     uvot_mode = forms.CharField(
@@ -192,7 +192,7 @@ class SwiftObservationForm(BaseObservationForm):
                              ' See <a target=_blank'
                              ' href=https://www.swift.psu.edu/operations/mode_lookup.php>'
                              'UVOT Mode Lookup Tool</a>'
-                            )),
+                             )),
     )  # 0x9999 is the "Filter of the Day" and does not require justification
 
     # required unless uvot_mode is 0x9999 (Filter of the Day)
@@ -657,8 +657,8 @@ class SwiftFacility(BaseObservationFacility):
         logger.debug(f'validate_observation response: {too_is_valid}')
 
         if too_is_valid:
-            # if the too was internally valid, now validate with the server
-            logger.debug(f'validate_observation - calling too.server_validate()')
+            # if the TOO was internally valid, now validate with the server
+            logger.debug('validate_observation - calling too.server_validate()')
             too_is_server_valid = self.swift_api.too.server_validate()
 
         #  logger.debug(f'validate_observation - too.status: {self.swift_api.too.status}')
@@ -681,7 +681,7 @@ class SwiftFacility(BaseObservationFacility):
             logger.debug(f'validate_observation - too.status.status: {self.swift_api.too.status.status}')
             logger.debug(f'validate_observation - too.status.errors: {self.swift_api.too.status.errors}')
             logger.debug(f'validate_observation - type(too.status.errors): {type(self.swift_api.too.status.errors)}')
-            
+
             validation_errors = self.swift_api.too.status.errors
 
         return validation_errors
@@ -698,7 +698,7 @@ class SwiftFacility(BaseObservationFacility):
 
         returns a list of (field, error) tuples if the observation is invalid
 
-        See https://www.swift.psu.edu/too_api/ for documentation. 
+        See https://www.swift.psu.edu/too_api/ for documentation.
 
         The super class method is absract. No need to call it.
          """
@@ -712,9 +712,9 @@ class SwiftFacility(BaseObservationFacility):
                            f' to True before we call too.submit()')
             self.swift_api.too.debug = True
 
-        logger.debug(f'calling too.submit()')
+        logger.debug('calling too.submit()')
         self.swift_api.too.submit()
-        logger.debug(f'too.submit() returned')
+        logger.debug('too.submit() returned')
 
         logger.info(f'submit_observation - too.status.status: {self.swift_api.too.status.status}')
         logger.info(f'submit_observation - too.status.errors: {self.swift_api.too.status.errors}')

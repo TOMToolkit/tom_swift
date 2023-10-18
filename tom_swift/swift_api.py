@@ -41,11 +41,12 @@ class SwiftAPI:
         """
         try:
             username = settings.FACILITIES['SWIFT'].get('SWIFT_USERNAME', 'SWIFT_USERNAME not configured')
-            shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_SHARED_SECRET', 'SWIFT_SHARED_SECRET not configured')
+            shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_SHARED_SECRET',
+                                                             'SWIFT_SHARED_SECRET not configured')
 
             logger.info(f'swift username: {username}')
-        except KeyError as ex:
-            logger.error(f"'SWIFT' configuration dictionary not defined in settings.FACILITIES")
+        except KeyError:
+            logger.error("'SWIFT' configuration dictionary not defined in settings.FACILITIES")
             raise ImproperlyConfigured
         return username, shared_secret
 
@@ -131,7 +132,7 @@ SWIFT_INSTRUMENT_CHOICES = [
 #
 # XRT modes are converted to numbers. So,
 #    too.xrt_mode = 6
-# and 
+# and
 #    too.xrt_mode = 'WT'
 # are equivalent.
 #
