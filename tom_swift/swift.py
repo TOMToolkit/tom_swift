@@ -324,7 +324,9 @@ class SwiftObservationForm(BaseObservationForm):
                                ),
                 AccordionGroup('Tiling',
                                Div(
-                                   'tiling',
+                                   Div( # make the tiling Boolean widget a switch
+                                       Field('tiling', css_class="custom-control-input"),
+                                       css_class="custom-control custom-switch"),
                                    'number_of_tiles',
                                    'exposure_time_per_tile',
                                    'tiling_justification',
@@ -332,7 +334,9 @@ class SwiftObservationForm(BaseObservationForm):
                                ),
                 AccordionGroup('Swift Guest Investigator',
                                Div(
-                                   'proposal',
+                                   Div( # make the proposal Boolean widget a switch
+                                       Field('proposal', css_class="custom-control-input"),
+                                       css_class="custom-control custom-switch"),
                                    'proposal_id',
                                    'proposal_pi',
                                    'proposal_trigger_just',
