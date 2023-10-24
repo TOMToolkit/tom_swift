@@ -11,6 +11,7 @@ from tom_targets.models import Target
 from tom_swift import __version__
 from tom_swift.swift_api import (SwiftAPI,
                                  SWIFT_INSTRUMENT_CHOICES,
+                                 SWIFT_OTHER_CHOICE,
                                  SWIFT_TARGET_CLASSIFICATION_CHOICES,
                                  SWIFT_URGENCY_CHOICES,
                                  SWIFT_XRT_MODE_CHOICES,
@@ -518,7 +519,7 @@ class SwiftFacility(BaseObservationFacility):
 
         # Get the source_type from target_classification_choices or target_classification
         # depending on if they selected "Other (please specify)" in the drop-down menu
-        if observation_payload['target_classification_choices'] == 'Other (please specify)':
+        if observation_payload['target_classification_choices'] == SWIFT_OTHER_CHOICE:
             # they specified a custom target classification. So, use that.
             self.swift_api.too.source_type = observation_payload['target_classification']
         else:

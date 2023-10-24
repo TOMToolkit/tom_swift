@@ -11,7 +11,7 @@
 function showHideTargetClassificationFields() {
     const target_classification = document.getElementById('id_target_classification_choices').options[document.getElementById('id_target_classification_choices').selectedIndex].value;
     switch (target_classification) {
-        case 'Other (please specify)':
+        case 'Other (please specify)': // define as SWIFT_OTHER_CHOICE in swift_api.py
             // in this case show the target_classification CharField
             document.getElementById('div_id_target_classification').style.display = '';
             // and hide the grb_detector and grb_triggertime fields
@@ -150,7 +150,7 @@ function showHideSwiftGIProposalFields() {
         </dl>
         <hr>
         <!-- display tom_swift Facility version -->
-        <p><em>TOM Toolit Facility (<a target="_blank" href="https://github.com/TOMToolkit/tom_swift">tom_swift</a>) version {{ version }}</em></p>
+        <p><em>TOM Toolkit Facility (<a target="_blank" href="https://github.com/TOMToolkit/tom_swift">tom_swift</a>) version {{ version }}</em></p>
     </div>
     <!-- Column 2 -->
     <div class="col-md-6">

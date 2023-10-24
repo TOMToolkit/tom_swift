@@ -72,6 +72,9 @@ class SwiftAPI:
         return resolved_target
 
 
+# define OTHER_CHOICE so it can be used consistently and tested against
+SWIFT_OTHER_CHOICE = 'Other (please specify)'
+
 #
 # Urgency
 #
@@ -93,9 +96,8 @@ SWIFT_TARGET_CLASSIFICATION_CHOICES = [
     ('Supernova', 'Supernova'),
     ('Tidal Disruption Event', 'Tidal Disruption Event'),
     ('X-Ray Transient', 'X-Ray Transient'),
-    ('Other (please specify)', 'Other (please specify)'),
+    (SWIFT_OTHER_CHOICE, SWIFT_OTHER_CHOICE),
 ]
-
 
 #
 # Observation Types
