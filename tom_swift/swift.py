@@ -123,7 +123,7 @@ class SwiftObservationForm(BaseObservationForm):
 
     grb_triggertime = forms.DateTimeField(
         required=False,
-        label='GRB Trigger Date/Time',
+        label='GRB Trigger Date/Time [UTC]',
         # see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local
         widget=forms.TextInput(attrs={'class': 'ml-2', 'type': 'datetime-local'}))
 
