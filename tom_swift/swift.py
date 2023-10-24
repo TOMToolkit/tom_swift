@@ -124,9 +124,8 @@ class SwiftObservationForm(BaseObservationForm):
     grb_triggertime = forms.DateTimeField(
         required=False,
         label='GRB Trigger Date/Time',
-        widget=forms.DateTimeInput)  # TODO: finish this
-    # TODO: validate: required if target_classification is GRB
-    # TODO: make the widget nice
+        # see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local
+        widget=forms.TextInput(attrs={'class': 'ml-2', 'type': 'datetime-local'}))
 
     #
     # Science Justification
@@ -272,8 +271,8 @@ class SwiftObservationForm(BaseObservationForm):
                                'target_classification_choices',
                                'target_classification',
                                Div(
-                                   Div(Field('grb_detector_choices'), css_class='col-md-6',),
-                                   Div(Field('grb_triggertime'), css_class='col-md-6',),
+                                   Div(Field('grb_detector_choices'), css_class='col-md-5',),
+                                   Div(Field('grb_triggertime'), css_class='col-md-7',),
                                    css_class='row',
                                 ),
                                'grb_detector',
