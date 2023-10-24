@@ -296,7 +296,7 @@ class SwiftObservationForm(BaseObservationForm):
                                    'other_brightness',
                                ),
                                ),
-                AccordionGroup('Exposure Information',
+                AccordionGroup('Exposure & Visit Information',
                                Div(
                                    'exposure',
                                    'exp_time_just',
