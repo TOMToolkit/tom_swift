@@ -15,12 +15,23 @@ function showHideTargetClassificationFields() {
             // in this case show the target_classification CharField
             document.getElementById('div_id_target_classification').style.display = '';
             // and hide the grb_detector and grb_triggertime fields
+            document.getElementById('div_id_grb_detector_choices').style.display = 'none';
             document.getElementById('div_id_grb_detector').style.display = 'none';
             document.getElementById('div_id_grb_triggertime').style.display = 'none';
             break;
         case 'GRB':
             // in this case show the grb_detector and grb_triggertime fields
-            document.getElementById('div_id_grb_detector').style.display = '';
+            document.getElementById('div_id_grb_detector_choices').style.display = '';
+            // we do the other-please-specify dance if they want an Other GRB Detector
+            const grb_detector_choice = document.getElementById('id_grb_detector_choices').options[document.getElementById('id_grb_detector_choices').selectedIndex].value;
+            if (grb_detector_choice == 'Other (please specify)') {
+                // in this case show the grb_detector CharField
+                document.getElementById('div_id_grb_detector').style.display = '';
+            } else {
+                // in this case hide the grb_detector CharField
+                document.getElementById('div_id_grb_detector').style.display = 'none';
+            }
+
             document.getElementById('div_id_grb_triggertime').style.display = '';
             // and hide the target_classification CharField
             document.getElementById('div_id_target_classification').style.display = 'none';
@@ -28,6 +39,7 @@ function showHideTargetClassificationFields() {
         default:
             // in this case hide all the extra fields
             document.getElementById('div_id_target_classification').style.display = 'none';
+            document.getElementById('div_id_grb_detector_choices').style.display = 'none';
             document.getElementById('div_id_grb_detector').style.display = 'none';
             document.getElementById('div_id_grb_triggertime').style.display = 'none';
             break;
@@ -193,6 +205,10 @@ function showHideSwiftGIProposalFields() {
 
     var el5 = document.getElementById("div_id_proposal");
     el5.addEventListener("click", showHideSwiftGIProposalFields);
+
+    var el6 = document.getElementById("div_id_grb_detector_choices");
+    //el6.addEventListener("click", showHideGRBDetectionFields);
+    el6.addEventListener("click", showHideTargetClassificationFields);
 </script>
 
 {% endblock %}

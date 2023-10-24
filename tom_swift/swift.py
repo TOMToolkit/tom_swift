@@ -15,6 +15,7 @@ from tom_swift.swift_api import (SwiftAPI,
                                  SWIFT_TARGET_CLASSIFICATION_CHOICES,
                                  SWIFT_URGENCY_CHOICES,
                                  SWIFT_XRT_MODE_CHOICES,
+                                 get_grb_detector_choices,
                                  get_observation_type_choices,
                                  get_monitoring_unit_choices,)
 
@@ -108,10 +109,16 @@ class SwiftObservationForm(BaseObservationForm):
     #
     # GRB stuff
     #
-    grb_detector = forms.CharField(
+    grb_detector_choices = forms.ChoiceField(
         required=False,
         label='GRB Detector',
-        widget=forms.TextInput(attrs={'placeholder': 'Should be "Mission/Detection" (e.g. Swift/BAT, Fermi/LAT)'})
+        choices=get_grb_detector_choices(),
+    )
+
+    grb_detector = forms.CharField(
+        required=False,
+        label='Other GRB Detector',
+        widget=forms.TextInput(attrs={'placeholder': 'Specify other "Mission/Detection"'})
     )
 
     grb_triggertime = forms.DateTimeField(
@@ -264,8 +271,12 @@ class SwiftObservationForm(BaseObservationForm):
                 AccordionGroup('Target Information',
                                'target_classification_choices',
                                'target_classification',
+                               Div(
+                                   Div(Field('grb_detector_choices'), css_class='col-md-6',),
+                                   Div(Field('grb_triggertime'), css_class='col-md-6',),
+                                   css_class='row',
+                                ),
                                'grb_detector',
-                               'grb_triggertime',
                                'poserr',
                                ),
                 AccordionGroup('Science Justification',
@@ -305,7 +316,7 @@ class SwiftObservationForm(BaseObservationForm):
                                Div(
                                    'num_of_visits',
                                    'exp_time_per_visit',
-                                   Div(
+                                   Div(  # put these fields side-by-side in the same row
                                        Div(Field('monitoring_freq'), css_class='col-md-6',),
                                        Div(Field('monitoring_units'), css_class='col-md-6',),
                                        css_class='row',
@@ -551,7 +562,18 @@ class SwiftFacility(BaseObservationFacility):
         #
         # GRB stuff
         #
-        # TODO: GRB stuff
+        # If they specified GRB for the target_classification,
+        #     then set the grb_detector and grb_triggertime.
+        # And, if they specified SWIFT_OTHER_CHOICE for the GRB detector,
+        #     then set grb_detector from their text.
+        #
+        if observation_payload['target_classification_choices'] == 'GRB':
+            self.swift_api.too.grb_triggertime = observation_payload['grb_triggertime']
+            if observation_payload['grb_detector_choices'] == SWIFT_OTHER_CHOICE:
+                # they specified a custom GRB detector. So, use that.
+                self.swift_api.too.grb_detector = observation_payload['grb_detector']
+            else:
+                self.swift_api.too.grb_detector = observation_payload['grb_detector_choices']
 
         #
         # Science Justification
@@ -644,6 +666,7 @@ class SwiftFacility(BaseObservationFacility):
         self.swift_api.too.debug = observation_payload['debug']
 
         logger.info(f'SwiftFacility._configure_too - configured too:\n{self.swift_api.too}')
+
 
     def validate_observation(self, observation_payload) -> []:
         """Perform a dry-run of submitting the observation.

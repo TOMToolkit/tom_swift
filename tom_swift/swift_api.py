@@ -121,12 +121,32 @@ def get_observation_type_choices():
 #
 # Instruments
 #
+# could also use TOO().instruments, which is [ 'XRT', 'BAT', 'UVOT']
+# but that doesn't include the full names
 SWIFT_INSTRUMENT_CHOICES = [
     ('UVOT', 'UV/Optical Telescope (UVOT)'),
     ('XRT', 'X-ray Telescope (XRT)'),
     ('BAT', 'Burst Alert Telescope (BAT)'),
 ]
 
+#
+# GRB Detectors
+#
+def get_grb_detector_choices():
+    """Returns a list of tuples for the GRB detector choices.
+
+    Since the TOO() object has property describing the valid GRB detectors,
+    use that to create the choices list of tuples (e.g. [('Swift/BAT', 'Swift/BAT'), ('Fermi/LAT',
+    'Fermi/LAT'), ...]).
+    """
+    grb_detector_choices = []
+    for mission in TOO().mission_names:
+        if mission != 'ANTARES':
+            grb_detector_choices.append((mission, mission))
+
+    # add the SWIFT_OTHER_CHOICE
+    grb_detector_choices.append((SWIFT_OTHER_CHOICE, SWIFT_OTHER_CHOICE))
+    return grb_detector_choices
 
 #
 # XRT Modes
