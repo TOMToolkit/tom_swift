@@ -324,7 +324,7 @@ class SwiftObservationForm(BaseObservationForm):
                                ),
                 AccordionGroup('Tiling',
                                Div(
-                                   Div( # make the tiling Boolean widget a switch
+                                   Div(  # make the tiling Boolean widget a switch
                                        Field('tiling', css_class="custom-control-input"),
                                        css_class="custom-control custom-switch"),
                                    'number_of_tiles',
@@ -334,7 +334,7 @@ class SwiftObservationForm(BaseObservationForm):
                                ),
                 AccordionGroup('Swift Guest Investigator',
                                Div(
-                                   Div( # make the proposal Boolean widget a switch
+                                   Div(  # make the proposal Boolean widget a switch
                                        Field('proposal', css_class="custom-control-input"),
                                        css_class="custom-control custom-switch"),
                                    'proposal_id',
@@ -669,7 +669,6 @@ class SwiftFacility(BaseObservationFacility):
         self.swift_api.too.debug = observation_payload['debug']
 
         logger.info(f'SwiftFacility._configure_too - configured too:\n{self.swift_api.too}')
-
 
     def validate_observation(self, observation_payload) -> []:
         """Perform a dry-run of submitting the observation.

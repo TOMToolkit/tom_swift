@@ -99,12 +99,14 @@ SWIFT_TARGET_CLASSIFICATION_CHOICES = [
     (SWIFT_OTHER_CHOICE, SWIFT_OTHER_CHOICE),
 ]
 
+
 #
 # Observation Types
 #
 # Note that:
 # >>> TOO().obs_types
 # ['Spectroscopy', 'Light Curve', 'Position', 'Timing']
+#
 def get_observation_type_choices():
     """Returns a list of tuples for the observation type choices.
 
@@ -132,6 +134,8 @@ SWIFT_INSTRUMENT_CHOICES = [
 #
 # GRB Detectors
 #
+
+
 def get_grb_detector_choices():
     """Returns a list of tuples for the GRB detector choices.
 
@@ -147,6 +151,7 @@ def get_grb_detector_choices():
     # add the SWIFT_OTHER_CHOICE
     grb_detector_choices.append((SWIFT_OTHER_CHOICE, SWIFT_OTHER_CHOICE))
     return grb_detector_choices
+
 
 #
 # XRT Modes
