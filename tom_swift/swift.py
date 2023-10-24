@@ -127,15 +127,17 @@ class SwiftObservationForm(BaseObservationForm):
         required=False, label='Immediate Objective',
         widget=forms.Textarea(attrs={
             'rows': 2,
-            'placeholder': 'One sentence explanation of this TOO request.'})
-        )
+            'placeholder': 'One sentence explanation of this TOO request.'
+        })
+    )
 
     science_just = forms.CharField(
         required=False, label='Science Justification',
         widget=forms.Textarea(attrs={
             'rows': 8,
-            'placeholder': 'A persuasive paragraph or two explaining why this object requires rapid observation.'})
-        )
+            'placeholder': 'Two or three persuasive paragraphs explaining why this object requires rapid observation.'
+        })
+    )
 
     #
     # Exposure requested time (total)
