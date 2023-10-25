@@ -96,9 +96,14 @@ class SwiftObservationForm(BaseObservationForm):
     # Description of the source brightness for various instruments
     #
     # TODO: validation - answer at least one of these questions
-    optical_magnitude = forms.FloatField(required=False, label='Optical Magnitude')
-    optical_filter = forms.CharField(required=False, help_text='What filter was the optical magnitude measured in?',
-                                     initial='u')
+    optical_magnitude = forms.FloatField(
+        required=False,
+        label='Optical Magnitude')
+    optical_filter = forms.CharField(
+        required=False,
+        label='Optical Filter',
+        help_text='What filter was the optical magnitude measured in?',
+        initial='u')
     xrt_countrate = forms.FloatField(required=False, label='XRT Count Rate [counts/second]')
     bat_countrate = forms.FloatField(required=False, label='BAT Count Rate [counts/second]')
     other_brightness = forms.CharField(
@@ -288,8 +293,8 @@ class SwiftObservationForm(BaseObservationForm):
                                Div(
                                    Div(  # this div is to put instrument drop-down and slew_in_place checkbox
                                          # side-by-side in the same row
-                                       Div(Field('instrument'), css_class='col-md-6',),
-                                       Div(Field('slew_in_place'), css_class='col-md-6',),
+                                       Div(Field('instrument'), css_class='col-md-7',),
+                                       Div(Field('slew_in_place'), css_class='col-md-5',),
                                        css_class='row',
                                    ),
                                    'xrt_mode',
@@ -300,10 +305,16 @@ class SwiftObservationForm(BaseObservationForm):
                 AccordionGroup('Source Brightness',
                                Div(
                                    'obs_type',
-                                   'optical_magnitude',
-                                   'optical_filter',
-                                   'xrt_countrate',
-                                   'bat_countrate',
+                                   Div(
+                                       Div(Field('optical_magnitude'), css_class='col-md-6'),
+                                       Div(Field('optical_filter'), css_class='col-md-6',),
+                                       css_class='row',
+                                   ),
+                                   Div(
+                                       Div(Field('xrt_countrate'), css_class='col-md-6'),
+                                       Div(Field('bat_countrate'), css_class='col-md-6',),
+                                       css_class='row',
+                                   ),
                                    'other_brightness',
                                ),
                                ),
