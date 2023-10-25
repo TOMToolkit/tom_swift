@@ -201,7 +201,8 @@ SWIFT_UVOT_FILTER_MODE_CHOICES = [
     (0x30ed, 'standard six-filter blue-weighted mode (0x30ed)'),
     (0x223f, 'heavily weighted six-filter mode; for supernovae and very red objects (0x223f)'),
     (0x2241, 'all seven optical/UV filters (0x2241)'),
-    (0x0270, 'unscaled six-filter mode to get 6 broadband filters in AT observations with snapshot lengths > 1000s (0x0270)'),
+    (0x0270, ('unscaled six-filter mode to get 6 broadband filters in AT observations with'
+              ' snapshot lengths > 1000s (0x0270)')),
     (0x9999, 'Filter of the Day (0x9999)'),
     (SWIFT_OTHER_CHOICE, SWIFT_OTHER_CHOICE),
 ]
