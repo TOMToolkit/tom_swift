@@ -187,6 +187,25 @@ SWIFT_XRT_MODE_CHOICES = [
 # Any string will validate:
 # >>> too.uvot_mode = "I think I want all UV filters for this, whatever the UVOT team recommends."
 
+SWIFT_UVOT_FILTER_MODE_CHOICES = [
+    (0x015a, 'uvm2 (0x015a)'),
+    (0x011e, 'uvw2 (0x011e)'),
+    (0x01aa, 'u (0x01aa)'),
+    (0x018c, 'uvw1 (0x018c)'),
+    (0x2016, 'B (0x2016)'),
+    (0x2005, 'V (0x2005)'),
+    (0x2019, 'white (0x2019)'),
+    (0x209a, 'three optical filters (0x209a)'),
+    (0x308f, 'three NUV filters (0x308f)'),
+    (0x30d5, 'four UV/NUV filters (0x30d5)'),
+    (0x30ed, 'standard six-filter blue-weighted mode (0x30ed)'),
+    (0x223f, 'heavily weighted six-filter mode; for supernovae and very red objects (0x223f)'),
+    (0x2241, 'all seven optical/UV filters (0x2241)'),
+    (0x0270, 'unscaled six-filter mode to get 6 broadband filters in AT observations with snapshot lengths > 1000s (0x0270)'),
+    (0x9999, 'Filter of the Day (0x9999)'),
+    (SWIFT_OTHER_CHOICE, SWIFT_OTHER_CHOICE),
+]
+
 
 #
 # Monitoring

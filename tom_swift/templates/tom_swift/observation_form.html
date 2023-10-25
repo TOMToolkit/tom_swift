@@ -69,12 +69,19 @@ function showHideInstrumentModeFields() {
             // show the xrt_mode field; hide the UVOT fields
             document.getElementById('div_id_xrt_mode').style.display = '';
             document.getElementById('div_id_uvot_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_mode_choices').style.display = 'none';
             document.getElementById('div_id_uvot_just').style.display = 'none';
             break;
         case 'UVOT':
             console.log('UVOT instrument selected');
             // show the uvot_mode and uvot_just fields; hide the xrt_mode fields
-            document.getElementById('div_id_uvot_mode').style.display = '';
+            const uvot_mode = document.getElementById('id_uvot_mode_choices').options[document.getElementById('id_uvot_mode_choices').selectedIndex].value;
+            if (uvot_mode == 'Other (please specify)') {
+                document.getElementById('div_id_uvot_mode').style.display = '';
+            } else {
+                document.getElementById('div_id_uvot_mode').style.display = 'none';
+            }
+            document.getElementById('div_id_uvot_mode_choices').style.display = '';
             document.getElementById('div_id_uvot_just').style.display = '';
             document.getElementById('div_id_xrt_mode').style.display = 'none';
             break;
@@ -83,6 +90,7 @@ function showHideInstrumentModeFields() {
             // not sure what to show or hide here (hide everything?)
             document.getElementById('div_id_xrt_mode').style.display = 'none';
             document.getElementById('div_id_uvot_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_mode_choices').style.display = 'none';
             document.getElementById('div_id_uvot_just').style.display = 'none';
             break;
     }
@@ -196,6 +204,9 @@ function showHideSwiftGIProposalFields() {
 
     var el2 = document.getElementById("div_id_instrument");
     el2.addEventListener("click", showHideInstrumentModeFields);
+
+    var el7 = document.getElementById("div_id_uvot_mode_choices");
+    el7.addEventListener("click", showHideInstrumentModeFields);
 
     var el3 = document.getElementById("div_id_num_of_visits");
     el3.addEventListener("click", showHideMonitoringFields);

@@ -15,6 +15,7 @@ from tom_swift.swift_api import (SwiftAPI,
                                  SWIFT_TARGET_CLASSIFICATION_CHOICES,
                                  SWIFT_URGENCY_CHOICES,
                                  SWIFT_XRT_MODE_CHOICES,
+                                 SWIFT_UVOT_FILTER_MODE_CHOICES,
                                  get_grb_detector_choices,
                                  get_observation_type_choices,
                                  get_monitoring_unit_choices,)
@@ -193,20 +194,28 @@ class SwiftObservationForm(BaseObservationForm):
     #
     xrt_mode = forms.TypedChoiceField(
         required=False,
-        label='XRT mode',
+        label='XRT Mode',
         choices=SWIFT_XRT_MODE_CHOICES,
         coerce=int,  # convert the string '6' to int 6
         initial=6)  # Windowed Timing (WT))
 
+    uvot_mode_choices = forms.ChoiceField(
+        required=False,
+        label='UVOT Filter Mode',
+        initial=SWIFT_UVOT_FILTER_MODE_CHOICES[-2],
+        choices=SWIFT_UVOT_FILTER_MODE_CHOICES,
+        help_text=mark_safe((f'These are some common UVOT Filter modes.'
+                             f' See <a target=_blank'
+                             f' href=https://www.swift.psu.edu/operations/mode_lookup.php>'
+                             f'UVOT Mode Lookup Tool</a>.'
+                             f' Select "{SWIFT_OTHER_CHOICE}" to specify your own filter mode'
+                             f' or give written instructions.'
+                             )),
+    )
+
     uvot_mode = forms.CharField(
         required=False,
-        label='UVOT filter mode',
-        initial='0x9999',
-        help_text=mark_safe(('Supply a specific UVOT Filter mode or written instructions.'
-                             ' See <a target=_blank'
-                             ' href=https://www.swift.psu.edu/operations/mode_lookup.php>'
-                             'UVOT Mode Lookup Tool</a>'
-                             )),
+        label='Other UVOT Filter Mode',
     )  # 0x9999 is the "Filter of the Day" and does not require justification
 
     # required unless uvot_mode is 0x9999 (Filter of the Day)
@@ -298,6 +307,7 @@ class SwiftObservationForm(BaseObservationForm):
                                        css_class='row',
                                    ),
                                    'xrt_mode',
+                                   'uvot_mode_choices',
                                    'uvot_mode',
                                    'uvot_just',
                                ),
@@ -647,9 +657,14 @@ class SwiftFacility(BaseObservationFacility):
             self.swift_api.too.uvot_mode = None
             self.swift_api.too.uvot_just = None
         elif self.swift_api.too.instrument == 'UVOT':
-            self.swift_api.too.uvot_mode = observation_payload['uvot_mode']
             self.swift_api.too.uvot_just = observation_payload['uvot_just']
             self.swift_api.too.xrt_mode = None
+            if observation_payload['uvot_mode_choices'] == SWIFT_OTHER_CHOICE:
+                # use the value from the uvot_mode text field
+                self.swift_api.too.uvot_mode = observation_payload['uvot_mode']
+            else:
+                # use the value from the drop-down menu
+                self.swift_api.too.uvot_mode = observation_payload['uvot_mode_choices']
         else:
             # XRT mode
             self.swift_api.too.xrt_mode = observation_payload['xrt_mode']
