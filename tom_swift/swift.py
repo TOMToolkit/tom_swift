@@ -108,8 +108,11 @@ class SwiftObservationForm(BaseObservationForm):
     xrt_countrate = forms.FloatField(required=False, label='XRT Count Rate [counts/second]')
     bat_countrate = forms.FloatField(required=False, label='BAT Count Rate [counts/second]')
     other_brightness = forms.CharField(
-        required=False, label='Other Brightness',
-        widget=forms.TextInput(attrs={'placeholder': 'Any other brightness information.'})
+        required=False, label='Additional Brightness Information',
+        widget=forms.Textarea(attrs={
+            'rows': 2,
+            'placeholder': 'Any other brightness information.',
+        })
     )
 
     #
