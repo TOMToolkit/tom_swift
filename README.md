@@ -31,7 +31,7 @@ pip install tom-swift
 `settings.py`:
    ```python
     TOM_FACILITY_CLASSES = [
-       'tom_observations.facilities.lco.LCOFacility',
+        'tom_observations.facilities.lco.LCOFacility',
         ...
         'tom_swift.swift.SwiftFacility',
     ]
