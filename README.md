@@ -18,17 +18,7 @@ Install the module into your TOM environment:
 pip install tom-swift
 ```
 
-1. Add `tom_swift.swift.SwiftFacility` to the `TOM_FACILITY_CLASSES` in your TOM's
-`settings.py`:
-```python
-    TOM_FACILITY_CLASSES = [
-        'tom_observations.facilities.lco.LCOFacility',
-        ...
-        'tom_swift.swift.SwiftFacility',
-    ]
-```
-
-2. In your project `settings.py`, add `tom_swift` to your `INSTALLED_APPS` setting:
+1. In your project `settings.py`, add `tom_swift` to your `INSTALLED_APPS` setting:
 
     ```python
     INSTALLED_APPS = [
@@ -36,6 +26,16 @@ pip install tom-swift
         'tom_swift',
     ]
     ```
+
+2. Add `tom_swift.swift.SwiftFacility` to the `TOM_FACILITY_CLASSES` in your TOM's
+`settings.py`:
+   ```python
+    TOM_FACILITY_CLASSES = [
+       'tom_observations.facilities.lco.LCOFacility',
+        ...
+        'tom_swift.swift.SwiftFacility',
+    ]
+   ```   
 
 ## Configuration
 
