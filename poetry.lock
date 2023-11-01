@@ -316,13 +316,13 @@ tzdata = ["tzdata"]
 
 [[package]]
 name = "batanalysis"
-version = "1.0.2"
+version = "1.0.4"
 description = "Routines for analyzing data from BAT on the Neil Gehrels Swift Observatory"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "BatAnalysis-1.0.2-py3-none-any.whl", hash = "sha256:a8735a5ed9cd61b1340fcca4d2892a8014bf0166388734251ab58b9ac29f90ec"},
-    {file = "BatAnalysis-1.0.2.tar.gz", hash = "sha256:f76292600b138abedee50736dacfdc85d767c7854262aa8e987f65b8bb4e0365"},
+    {file = "BatAnalysis-1.0.4-py3-none-any.whl", hash = "sha256:6830b762e616ac8fc56b89531405e1bd9403a14715ec2ce85bdc4154314e33f7"},
+    {file = "BatAnalysis-1.0.4.tar.gz", hash = "sha256:5effcec9b789e703b82d39201af4cd5584387a54a161fb9cade174a3a89df1c8"},
 ]
 
 [package.dependencies]
@@ -1522,8 +1522,8 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.20.3", markers = "python_version < \"3.10\""},
-    {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
