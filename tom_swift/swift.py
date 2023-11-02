@@ -176,7 +176,11 @@ class SwiftObservationForm(BaseObservationForm):
         help_text=('If number of visits is more than one, then complete exposure'
                    ' time per visit and monitoring frequency.'),
         initial=1)
-    monitoring_freq = forms.IntegerField(required=False, label='Monitoring Frequency', initial=1)
+    monitoring_freq = forms.IntegerField(
+        required=False,
+        label='Monitoring Frequency',
+        help_text=('One visit every N monitoring units.'),
+        initial=1)
     monitoring_units = forms.ChoiceField(
         required=False,
         choices=get_monitoring_unit_choices(),

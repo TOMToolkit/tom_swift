@@ -219,5 +219,5 @@ def get_monitoring_unit_choices():
     """
     monitoring_unit_choices = []
     for unit in TOO().monitoring_units:
-        monitoring_unit_choices.append((unit, unit))
+        monitoring_unit_choices.append((unit, f'{unit}(s)'))
     return monitoring_unit_choices
