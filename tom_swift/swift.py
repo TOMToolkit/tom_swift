@@ -158,9 +158,12 @@ class SwiftObservationForm(BaseObservationForm):
     #
     # Exposure requested time (total)
     #
-    exposure = forms.FloatField(required=False, label='Exposure time requested [s]', initial=500)
+    exposure = forms.FloatField(
+        required=True,
+        label='Total exposure time requested [s]')
     exp_time_just = forms.CharField(
-        required=False, label='Exposure Time Justification',
+        required=True,
+        label='Exposure time justification',
         widget=forms.Textarea(attrs={
             'rows': 2,
             'placeholder': 'Briefly justify the exposure time requested.'}),
@@ -178,7 +181,7 @@ class SwiftObservationForm(BaseObservationForm):
         initial=1)
     monitoring_freq = forms.IntegerField(
         required=False,
-        label='Monitoring Frequency',
+        label='Monitoring frequency',
         help_text=('One visit every N monitoring units.'),
         initial=1)
     monitoring_units = forms.ChoiceField(
