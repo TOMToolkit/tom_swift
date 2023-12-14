@@ -316,13 +316,13 @@ tzdata = ["tzdata"]
 
 [[package]]
 name = "batanalysis"
-version = "1.0.4"
+version = "1.0.6"
 description = "Routines for analyzing data from BAT on the Neil Gehrels Swift Observatory"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "BatAnalysis-1.0.4-py3-none-any.whl", hash = "sha256:6830b762e616ac8fc56b89531405e1bd9403a14715ec2ce85bdc4154314e33f7"},
-    {file = "BatAnalysis-1.0.4.tar.gz", hash = "sha256:5effcec9b789e703b82d39201af4cd5584387a54a161fb9cade174a3a89df1c8"},
+    {file = "BatAnalysis-1.0.6-py3-none-any.whl", hash = "sha256:5472fd9a841aa02699315fd700bb9363e99e2f4908aed2b1256041db8fcd1ed6"},
+    {file = "BatAnalysis-1.0.6.tar.gz", hash = "sha256:bbd62cec6b9851ae162ab63a7845b3d4e0608a738639b501d15f264605108f17"},
 ]
 
 [package.dependencies]
