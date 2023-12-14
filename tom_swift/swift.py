@@ -819,3 +819,11 @@ class SwiftFacility(BaseObservationFacility):
         #  self.swift_api.too.status.too_id = 19529 #  an actual NCG1566 TOO
 
         return [too_id]
+
+    def update_all_observation_statuses(self, target):
+        """This would normaly be implemented by BaseRoboticObservationFacility, but that's
+        not one of our super classes. So, for now, we have a stub implementation here.
+        """
+        failed_records = []
+        logger.warning(f'Swift Facility - update_all_observation_statuses not implemented yet. target: {target}')
+        return failed_records
