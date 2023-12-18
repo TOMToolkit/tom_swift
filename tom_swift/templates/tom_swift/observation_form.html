@@ -128,6 +128,10 @@ function showHideSwiftGIProposalFields() {
     }
 };
 
+function showExposureAccordianOnError() {
+    const exposureAccordion = document.getElementById('exposure-visit-information');
+    exposureAccordion.classList.add('show');
+}
 </script>
 
 <script type="text/javascript">
@@ -220,6 +224,12 @@ function showHideSwiftGIProposalFields() {
     var el6 = document.getElementById("div_id_grb_detector_choices");
     //el6.addEventListener("click", showHideGRBDetectionFields);
     el6.addEventListener("change", showHideTargetClassificationFields);
+
+    var el7 = document.getElementById("id_exposure");
+    el7.addEventListener("invalid", showExposureAccordianOnError);
+
+    var el8 = document.getElementById("id_exp_time_just");
+    el8.addEventListener("invalid", showExposureAccordianOnError);
 </script>
 
 {% endblock %}
