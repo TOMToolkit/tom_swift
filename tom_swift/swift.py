@@ -680,7 +680,12 @@ class SwiftFacility(BaseObservationFacility):
             self.swift_api.too.xrt_mode = observation_payload['xrt_mode']
             self.swift_api.too.uvot_mode = None
             self.swift_api.too.uvot_just = None
-        self.swift_api.too.slew_in_place = observation_payload['slew_in_place']
+
+        # WARNING: Setting too.slew_in_place to False causes a timeout error in too.server_validate() !!!
+        if observation_payload['slew_in_place']:
+            self.swift_api.too.slew_in_place = observation_payload['slew_in_place']
+        else:
+            self.swift_api.too.slew_in_place = None  # do NOT slew_in_place to False!!!
 
         #
         # Tiling request
