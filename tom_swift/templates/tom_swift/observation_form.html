@@ -144,7 +144,7 @@ function showExposureAccordianOnError() {
 <!-- see also script element at end of file -->
 
 {{ form|as_crispy_errors }}
-<h1>Submit Request to Neil Gehrels Swift Observatory</h1>
+<h1>Submit Request to Neil Gehrels Swift Observatory for <a href="{% url 'targets:detail' pk=target.id %}">{{target.name}}</a></h1>
 
 
 {% if target.type == 'SIDEREAL' %}
