@@ -717,6 +717,7 @@ class SwiftFacility(BaseObservationFacility):
 
         validation_errors = []
         # first, validate the too locally
+        logger.debug(f'validate_observation - calling too.validate():\n{self.swift_api.too}')
         too_is_valid = self.swift_api.too.validate()
         logger.debug(f'validate_observation response: {too_is_valid}')
 
