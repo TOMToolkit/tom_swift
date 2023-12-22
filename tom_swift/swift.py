@@ -11,9 +11,12 @@ from tom_targets.models import Target
 from tom_swift import __version__
 from tom_swift.swift_api import (SwiftAPI,
                                  SWIFT_INSTRUMENT_CHOICES,
+                                 SWIFT_OTHER_CHOICE,
                                  SWIFT_TARGET_CLASSIFICATION_CHOICES,
                                  SWIFT_URGENCY_CHOICES,
                                  SWIFT_XRT_MODE_CHOICES,
+                                 SWIFT_UVOT_FILTER_MODE_CHOICES,
+                                 get_grb_detector_choices,
                                  get_observation_type_choices,
                                  get_monitoring_unit_choices,)
 
@@ -94,31 +97,44 @@ class SwiftObservationForm(BaseObservationForm):
     # Description of the source brightness for various instruments
     #
     # TODO: validation - answer at least one of these questions
-    optical_magnitude = forms.FloatField(required=False, label='Optical Magnitude')
-    optical_filter = forms.CharField(required=False, help_text='What filter was the optical magnitude measured in?',
-                                     initial='u')
+    optical_magnitude = forms.FloatField(
+        required=False,
+        label='Optical Magnitude')
+    optical_filter = forms.CharField(
+        required=False,
+        label='Optical Filter',
+        help_text='What filter was the optical magnitude measured in?',
+        initial='u')
     xrt_countrate = forms.FloatField(required=False, label='XRT Count Rate [counts/second]')
     bat_countrate = forms.FloatField(required=False, label='BAT Count Rate [counts/second]')
     other_brightness = forms.CharField(
-        required=False, label='Other Brightness',
-        widget=forms.TextInput(attrs={'placeholder': 'Any other brightness information.'})
+        required=False, label='Additional Brightness Information',
+        widget=forms.Textarea(attrs={
+            'rows': 2,
+            'placeholder': 'Any other brightness information.',
+        })
     )
 
     #
     # GRB stuff
     #
-    grb_detector = forms.CharField(
+    grb_detector_choices = forms.ChoiceField(
         required=False,
         label='GRB Detector',
-        widget=forms.TextInput(attrs={'placeholder': 'Should be "Mission/Detection" (e.g. Swift/BAT, Fermi/LAT)'})
+        choices=get_grb_detector_choices(),
+    )
+
+    grb_detector = forms.CharField(
+        required=False,
+        label='Other GRB Detector',
+        widget=forms.TextInput(attrs={'placeholder': 'Specify other "Mission/Detection"'})
     )
 
     grb_triggertime = forms.DateTimeField(
         required=False,
-        label='GRB Trigger Date/Time',
-        widget=forms.DateTimeInput)  # TODO: finish this
-    # TODO: validate: required if target_classification is GRB
-    # TODO: make the widget nice
+        label='GRB Trigger Date/Time [UTC]',
+        # see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local
+        widget=forms.TextInput(attrs={'class': 'ml-2', 'type': 'datetime-local'}))
 
     #
     # Science Justification
@@ -127,22 +143,27 @@ class SwiftObservationForm(BaseObservationForm):
         required=False, label='Immediate Objective',
         widget=forms.Textarea(attrs={
             'rows': 2,
-            'placeholder': 'One sentence explanation of this TOO request.'})
-        )
+            'placeholder': 'One sentence explanation of this TOO request.'
+        })
+    )
 
     science_just = forms.CharField(
         required=False, label='Science Justification',
         widget=forms.Textarea(attrs={
             'rows': 8,
-            'placeholder': 'A persuasive paragraph or two explaining why this object requires rapid observation.'})
-        )
+            'placeholder': 'Two or three persuasive paragraphs explaining why this object requires rapid observation.'
+        })
+    )
 
     #
     # Exposure requested time (total)
     #
-    exposure = forms.FloatField(required=False, label='Exposure time requested [s]', initial=500)
+    exposure = forms.FloatField(
+        required=True,
+        label='Total exposure time requested [s]')
     exp_time_just = forms.CharField(
-        required=False, label='Exposure Time Justification',
+        required=True,
+        label='Exposure time justification',
         widget=forms.Textarea(attrs={
             'rows': 2,
             'placeholder': 'Briefly justify the exposure time requested.'}),
@@ -158,7 +179,11 @@ class SwiftObservationForm(BaseObservationForm):
         help_text=('If number of visits is more than one, then complete exposure'
                    ' time per visit and monitoring frequency.'),
         initial=1)
-    monitoring_freq = forms.IntegerField(required=False, label='Monitoring Frequency', initial=1)
+    monitoring_freq = forms.IntegerField(
+        required=False,
+        label='Monitoring frequency',
+        help_text=('One visit every N monitoring units.'),
+        initial=1)
     monitoring_units = forms.ChoiceField(
         required=False,
         choices=get_monitoring_unit_choices(),
@@ -179,20 +204,28 @@ class SwiftObservationForm(BaseObservationForm):
     #
     xrt_mode = forms.TypedChoiceField(
         required=False,
-        label='XRT mode',
+        label='XRT Mode',
         choices=SWIFT_XRT_MODE_CHOICES,
         coerce=int,  # convert the string '6' to int 6
         initial=6)  # Windowed Timing (WT))
 
+    uvot_mode_choices = forms.ChoiceField(
+        required=False,
+        label='UVOT Filter Mode',
+        initial=SWIFT_UVOT_FILTER_MODE_CHOICES[-2],
+        choices=SWIFT_UVOT_FILTER_MODE_CHOICES,
+        help_text=mark_safe((f'These are some common UVOT Filter modes.'
+                             f' See <a target=_blank'
+                             f' href=https://www.swift.psu.edu/operations/mode_lookup.php>'
+                             f'UVOT Mode Lookup Tool</a>.'
+                             f' Select "{SWIFT_OTHER_CHOICE}" to specify your own filter mode'
+                             f' or give written instructions.'
+                             )),
+    )
+
     uvot_mode = forms.CharField(
         required=False,
-        label='UVOT filter mode',
-        initial='0x9999',
-        help_text=mark_safe(('Supply a specific UVOT Filter mode or written instructions.'
-                             ' See <a target=_blank'
-                             ' href=https://www.swift.psu.edu/operations/mode_lookup.php>'
-                             'UVOT Mode Lookup Tool</a>'
-                             )),
+        label='Other UVOT Filter Mode',
     )  # 0x9999 is the "Filter of the Day" and does not require justification
 
     # required unless uvot_mode is 0x9999 (Filter of the Day)
@@ -261,8 +294,12 @@ class SwiftObservationForm(BaseObservationForm):
                 AccordionGroup('Target Information',
                                'target_classification_choices',
                                'target_classification',
+                               Div(
+                                   Div(Field('grb_detector_choices'), css_class='col-md-5',),
+                                   Div(Field('grb_triggertime'), css_class='col-md-7',),
+                                   css_class='row',
+                                ),
                                'grb_detector',
-                               'grb_triggertime',
                                'poserr',
                                ),
                 AccordionGroup('Science Justification',
@@ -275,11 +312,12 @@ class SwiftObservationForm(BaseObservationForm):
                                Div(
                                    Div(  # this div is to put instrument drop-down and slew_in_place checkbox
                                          # side-by-side in the same row
-                                       Div(Field('instrument'), css_class='col-md-6',),
-                                       Div(Field('slew_in_place'), css_class='col-md-6',),
+                                       Div(Field('instrument'), css_class='col-md-7',),
+                                       Div(Field('slew_in_place'), css_class='col-md-5',),
                                        css_class='row',
                                    ),
                                    'xrt_mode',
+                                   'uvot_mode_choices',
                                    'uvot_mode',
                                    'uvot_just',
                                ),
@@ -287,14 +325,20 @@ class SwiftObservationForm(BaseObservationForm):
                 AccordionGroup('Source Brightness',
                                Div(
                                    'obs_type',
-                                   'optical_magnitude',
-                                   'optical_filter',
-                                   'xrt_countrate',
-                                   'bat_countrate',
+                                   Div(
+                                       Div(Field('optical_magnitude'), css_class='col-md-6'),
+                                       Div(Field('optical_filter'), css_class='col-md-6',),
+                                       css_class='row',
+                                   ),
+                                   Div(
+                                       Div(Field('xrt_countrate'), css_class='col-md-6'),
+                                       Div(Field('bat_countrate'), css_class='col-md-6',),
+                                       css_class='row',
+                                   ),
                                    'other_brightness',
                                ),
                                ),
-                AccordionGroup('Exposure Information',
+                AccordionGroup('Exposure & Visit Information',
                                Div(
                                    'exposure',
                                    'exp_time_just',
@@ -302,7 +346,7 @@ class SwiftObservationForm(BaseObservationForm):
                                Div(
                                    'num_of_visits',
                                    'exp_time_per_visit',
-                                   Div(
+                                   Div(  # put these fields side-by-side in the same row
                                        Div(Field('monitoring_freq'), css_class='col-md-6',),
                                        Div(Field('monitoring_units'), css_class='col-md-6',),
                                        css_class='row',
@@ -311,7 +355,9 @@ class SwiftObservationForm(BaseObservationForm):
                                ),
                 AccordionGroup('Tiling',
                                Div(
-                                   'tiling',
+                                   Div(  # make the tiling Boolean widget a switch
+                                       Field('tiling', css_class="custom-control-input"),
+                                       css_class="custom-control custom-switch"),
                                    'number_of_tiles',
                                    'exposure_time_per_tile',
                                    'tiling_justification',
@@ -319,7 +365,9 @@ class SwiftObservationForm(BaseObservationForm):
                                ),
                 AccordionGroup('Swift Guest Investigator',
                                Div(
-                                   'proposal',
+                                   Div(  # make the proposal Boolean widget a switch
+                                       Field('proposal', css_class="custom-control-input"),
+                                       css_class="custom-control custom-switch"),
                                    'proposal_id',
                                    'proposal_pi',
                                    'proposal_trigger_just',
@@ -516,7 +564,7 @@ class SwiftFacility(BaseObservationFacility):
 
         # Get the source_type from target_classification_choices or target_classification
         # depending on if they selected "Other (please specify)" in the drop-down menu
-        if observation_payload['target_classification_choices'] == 'Other (please specify)':
+        if observation_payload['target_classification_choices'] == SWIFT_OTHER_CHOICE:
             # they specified a custom target classification. So, use that.
             self.swift_api.too.source_type = observation_payload['target_classification']
         else:
@@ -548,7 +596,18 @@ class SwiftFacility(BaseObservationFacility):
         #
         # GRB stuff
         #
-        # TODO: GRB stuff
+        # If they specified GRB for the target_classification,
+        #     then set the grb_detector and grb_triggertime.
+        # And, if they specified SWIFT_OTHER_CHOICE for the GRB detector,
+        #     then set grb_detector from their text.
+        #
+        if observation_payload['target_classification_choices'] == 'GRB':
+            self.swift_api.too.grb_triggertime = observation_payload['grb_triggertime']
+            if observation_payload['grb_detector_choices'] == SWIFT_OTHER_CHOICE:
+                # they specified a custom GRB detector. So, use that.
+                self.swift_api.too.grb_detector = observation_payload['grb_detector']
+            else:
+                self.swift_api.too.grb_detector = observation_payload['grb_detector_choices']
 
         #
         # Science Justification
@@ -608,15 +667,25 @@ class SwiftFacility(BaseObservationFacility):
             self.swift_api.too.uvot_mode = None
             self.swift_api.too.uvot_just = None
         elif self.swift_api.too.instrument == 'UVOT':
-            self.swift_api.too.uvot_mode = observation_payload['uvot_mode']
             self.swift_api.too.uvot_just = observation_payload['uvot_just']
             self.swift_api.too.xrt_mode = None
+            if observation_payload['uvot_mode_choices'] == SWIFT_OTHER_CHOICE:
+                # use the value from the uvot_mode text field
+                self.swift_api.too.uvot_mode = observation_payload['uvot_mode']
+            else:
+                # use the value from the drop-down menu
+                self.swift_api.too.uvot_mode = observation_payload['uvot_mode_choices']
         else:
             # XRT mode
             self.swift_api.too.xrt_mode = observation_payload['xrt_mode']
             self.swift_api.too.uvot_mode = None
             self.swift_api.too.uvot_just = None
-        self.swift_api.too.slew_in_place = observation_payload['slew_in_place']
+
+        # WARNING: Setting too.slew_in_place to False causes a timeout error in too.server_validate() !!!
+        if observation_payload['slew_in_place']:
+            self.swift_api.too.slew_in_place = observation_payload['slew_in_place']
+        else:
+            self.swift_api.too.slew_in_place = None  # do NOT slew_in_place to False!!!
 
         #
         # Tiling request
@@ -653,6 +722,7 @@ class SwiftFacility(BaseObservationFacility):
 
         validation_errors = []
         # first, validate the too locally
+        logger.debug(f'validate_observation - calling too.validate():\n{self.swift_api.too}')
         too_is_valid = self.swift_api.too.validate()
         logger.debug(f'validate_observation response: {too_is_valid}')
 
@@ -660,22 +730,6 @@ class SwiftFacility(BaseObservationFacility):
             # if the TOO was internally valid, now validate with the server
             logger.debug('validate_observation - calling too.server_validate()')
             too_is_server_valid = self.swift_api.too.server_validate()
-
-        #  logger.debug(f'validate_observation - too.status: {self.swift_api.too.status}')
-        #  logger.debug(f'validate_observation - dir(too.status): {dir(self.swift_api.too.status)}')
-        #  too_status_properties_removed = [
-        #    'clear', 'submit', 'jwt', 'queue',
-        #    'error', 'warning', 'validate',
-        #  ]
-        #  too_status_properties = ['api_data', 'api_name', 'api_version', 'began',
-        #                         'complete', 'completed', 'errors', 'fetchresult',
-        #                         'ignorekeys', 'jobnumber', 'result', 'shared_secret',
-        #                         'status', 'submit_url', 'timeout', 'timestamp',
-        #                         'too_api_dict', 'too_id', 'username', 'warnings']
-        #
-        #  for property in too_status_properties:
-        #   logger.debug(f'validate_observation - too.status.{property}: {getattr(self.swift_api.too.status,
-        #   property)}')
 
         if not (too_is_valid and too_is_server_valid):
             logger.debug(f'validate_observation - too.status.status: {self.swift_api.too.status.status}')
@@ -755,3 +809,11 @@ class SwiftFacility(BaseObservationFacility):
         #  self.swift_api.too.status.too_id = 19529 #  an actual NCG1566 TOO
 
         return [too_id]
+
+    def update_all_observation_statuses(self, target):
+        """This would normaly be implemented by BaseRoboticObservationFacility, but that's
+        not one of our super classes. So, for now, we have a stub implementation here.
+        """
+        failed_records = []
+        logger.warning(f'Swift Facility - update_all_observation_statuses not implemented yet. target: {target}')
+        return failed_records

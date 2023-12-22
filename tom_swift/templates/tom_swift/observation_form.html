@@ -11,16 +11,27 @@
 function showHideTargetClassificationFields() {
     const target_classification = document.getElementById('id_target_classification_choices').options[document.getElementById('id_target_classification_choices').selectedIndex].value;
     switch (target_classification) {
-        case 'Other (please specify)':
+        case 'Other (please specify)': // define as SWIFT_OTHER_CHOICE in swift_api.py
             // in this case show the target_classification CharField
             document.getElementById('div_id_target_classification').style.display = '';
             // and hide the grb_detector and grb_triggertime fields
+            document.getElementById('div_id_grb_detector_choices').style.display = 'none';
             document.getElementById('div_id_grb_detector').style.display = 'none';
             document.getElementById('div_id_grb_triggertime').style.display = 'none';
             break;
         case 'GRB':
             // in this case show the grb_detector and grb_triggertime fields
-            document.getElementById('div_id_grb_detector').style.display = '';
+            document.getElementById('div_id_grb_detector_choices').style.display = '';
+            // we do the other-please-specify dance if they want an Other GRB Detector
+            const grb_detector_choice = document.getElementById('id_grb_detector_choices').options[document.getElementById('id_grb_detector_choices').selectedIndex].value;
+            if (grb_detector_choice == 'Other (please specify)') {
+                // in this case show the grb_detector CharField
+                document.getElementById('div_id_grb_detector').style.display = '';
+            } else {
+                // in this case hide the grb_detector CharField
+                document.getElementById('div_id_grb_detector').style.display = 'none';
+            }
+
             document.getElementById('div_id_grb_triggertime').style.display = '';
             // and hide the target_classification CharField
             document.getElementById('div_id_target_classification').style.display = 'none';
@@ -28,6 +39,7 @@ function showHideTargetClassificationFields() {
         default:
             // in this case hide all the extra fields
             document.getElementById('div_id_target_classification').style.display = 'none';
+            document.getElementById('div_id_grb_detector_choices').style.display = 'none';
             document.getElementById('div_id_grb_detector').style.display = 'none';
             document.getElementById('div_id_grb_triggertime').style.display = 'none';
             break;
@@ -57,12 +69,19 @@ function showHideInstrumentModeFields() {
             // show the xrt_mode field; hide the UVOT fields
             document.getElementById('div_id_xrt_mode').style.display = '';
             document.getElementById('div_id_uvot_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_mode_choices').style.display = 'none';
             document.getElementById('div_id_uvot_just').style.display = 'none';
             break;
         case 'UVOT':
             console.log('UVOT instrument selected');
             // show the uvot_mode and uvot_just fields; hide the xrt_mode fields
-            document.getElementById('div_id_uvot_mode').style.display = '';
+            const uvot_mode = document.getElementById('id_uvot_mode_choices').options[document.getElementById('id_uvot_mode_choices').selectedIndex].value;
+            if (uvot_mode == 'Other (please specify)') {
+                document.getElementById('div_id_uvot_mode').style.display = '';
+            } else {
+                document.getElementById('div_id_uvot_mode').style.display = 'none';
+            }
+            document.getElementById('div_id_uvot_mode_choices').style.display = '';
             document.getElementById('div_id_uvot_just').style.display = '';
             document.getElementById('div_id_xrt_mode').style.display = 'none';
             break;
@@ -71,6 +90,7 @@ function showHideInstrumentModeFields() {
             // not sure what to show or hide here (hide everything?)
             document.getElementById('div_id_xrt_mode').style.display = 'none';
             document.getElementById('div_id_uvot_mode').style.display = 'none';
+            document.getElementById('div_id_uvot_mode_choices').style.display = 'none';
             document.getElementById('div_id_uvot_just').style.display = 'none';
             break;
     }
@@ -108,6 +128,10 @@ function showHideSwiftGIProposalFields() {
     }
 };
 
+function showExposureAccordianOnError() {
+    const exposureAccordion = document.getElementById('exposure-visit-information');
+    exposureAccordion.classList.add('show');
+}
 </script>
 
 <script type="text/javascript">
@@ -120,7 +144,7 @@ function showHideSwiftGIProposalFields() {
 <!-- see also script element at end of file -->
 
 {{ form|as_crispy_errors }}
-<h1>Submit Request to Neil Gehrels Swift Observatory</h1>
+<h1>Submit Request to Neil Gehrels Swift Observatory for <a href="{% url 'targets:detail' pk=target.id %}">{{target.name}}</a></h1>
 
 
 {% if target.type == 'SIDEREAL' %}
@@ -150,7 +174,7 @@ function showHideSwiftGIProposalFields() {
         </dl>
         <hr>
         <!-- display tom_swift Facility version -->
-        <p><em>TOM Toolit Facility (<a href="https://github.com/TOMToolkit/tom_swift">tom_swift</a>) version {{ version }}</em></p>
+        <p><em>TOM Toolkit Facility (<a target="_blank" href="https://github.com/TOMToolkit/tom_swift">tom_swift</a>) version {{ version }}</em></p>
     </div>
     <!-- Column 2 -->
     <div class="col-md-6">
@@ -180,19 +204,32 @@ function showHideSwiftGIProposalFields() {
  -->
 <script type="text/javascript">
     var el1 = document.getElementById("div_id_target_classification_choices");
-    el1.addEventListener("click", showHideTargetClassificationFields);
+    el1.addEventListener("change", showHideTargetClassificationFields);
 
     var el2 = document.getElementById("div_id_instrument");
-    el2.addEventListener("click", showHideInstrumentModeFields);
+    el2.addEventListener("change", showHideInstrumentModeFields);
+
+    var el7 = document.getElementById("div_id_uvot_mode_choices");
+    el7.addEventListener("change", showHideInstrumentModeFields);
 
     var el3 = document.getElementById("div_id_num_of_visits");
-    el3.addEventListener("click", showHideMonitoringFields);
+    el3.addEventListener("change", showHideMonitoringFields);
 
     var el4 = document.getElementById("div_id_tiling");
-    el4.addEventListener("click", showHideTilingFields);
+    el4.addEventListener("change", showHideTilingFields);
 
     var el5 = document.getElementById("div_id_proposal");
-    el5.addEventListener("click", showHideSwiftGIProposalFields);
+    el5.addEventListener("change", showHideSwiftGIProposalFields);
+
+    var el6 = document.getElementById("div_id_grb_detector_choices");
+    //el6.addEventListener("click", showHideGRBDetectionFields);
+    el6.addEventListener("change", showHideTargetClassificationFields);
+
+    var el7 = document.getElementById("id_exposure");
+    el7.addEventListener("invalid", showExposureAccordianOnError);
+
+    var el8 = document.getElementById("id_exp_time_just");
+    el8.addEventListener("invalid", showExposureAccordianOnError);
 </script>
 
 {% endblock %}
