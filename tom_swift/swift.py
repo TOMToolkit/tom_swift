@@ -758,14 +758,6 @@ class SwiftFacility(BaseObservationFacility):
          """
         self._configure_too(observation_payload)
 
-        # TODO: remove this for production
-        if not self.swift_api.too.debug:
-            # while in development, exit early if we're not in debug mode. (i.e. don't submit).
-            logger.warning(f'submit_observation - Skipping ACTUAL submission!!! too.debug: {self.swift_api.too.debug}'
-                           f' Even though, in the form, Debug is {self.swift_api.too.debug}, it is being reset'
-                           f' to True before we call too.submit()')
-            self.swift_api.too.debug = True
-
         logger.debug('calling too.submit()')
         self.swift_api.too.submit()
         logger.debug('too.submit() returned')
