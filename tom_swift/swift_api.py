@@ -79,6 +79,7 @@ SWIFT_OTHER_CHOICE = 'Other (please specify)'
 # Urgency
 #
 SWIFT_URGENCY_CHOICES = [
+    (0, 'Immediately (Urgency 0)')
     (1, 'Within 4 hours (Wakes up the Swift Observatory Duty Scientist).'),
     (2, 'Within 24 hours'),
     (3, 'Days to a week'),  # default
