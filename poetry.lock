@@ -2129,13 +2129,13 @@ doc = ["sphinx"]
 
 [[package]]
 name = "swifttools"
-version = "3.0.22"
+version = "3.0.23"
 description = "Tools for users of the Swift satellite"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "swifttools-3.0.22-py36-none-any.whl", hash = "sha256:f259e99287e7a9930f22c2763e6ac0e6b2574913835558064b27d8cf383ac2f8"},
-    {file = "swifttools-3.0.22.tar.gz", hash = "sha256:2e4bac6a758ffdb8726f6caf3896600098dda6c7271c6f6cb123d5505068cf07"},
+    {file = "swifttools-3.0.23-py36-none-any.whl", hash = "sha256:351b812b79a34dc412b7da2d7ac9f19f9dafce327c8fa047cec684726b05b0d7"},
+    {file = "swifttools-3.0.23.tar.gz", hash = "sha256:a852671be5c53d09c44fb711aeb39c5f8a08239f1acffb369b59321791290de4"},
 ]
 
 [package.dependencies]
