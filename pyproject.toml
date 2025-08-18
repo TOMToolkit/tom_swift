@@ -1,18 +1,21 @@
-[tool.poetry]
+[project]
 name = "tom-swift"
-# this version is a placeholder: version supplied by poetry-dynamic-versioning
-version = "0.0.0"
 description = "TOM Toolkit Facility module for the Neil Gehrels Swift Observatory"
-authors = ["Lindy Lindstrom <llindstrom@lco.global>"]
-license = "GPL-3.0-or-later"
+authors = [{name = "Lindy Lindstrom", email = "llindstrom@lco.global"}]
+license = {text = "GPL-3.0-or-later"}
 readme = "README.md"
+version = "0.0.0" # version supplied by poetry-dynamic-versioning
+dynamic = ["version"]
+requires-python = ">=3.9.0,<3.13"
+dependencies = [
+    "tomtoolkit >=2.15,<3",
+    "swifttools <4",
+    "boto3 <2",
+]
+
+[tool.poetry]
 packages = [{include = "tom_swift"}]
 
-[tool.poetry.dependencies]
-python = ">=3.8.1,<3.12"
-tomtoolkit = ">=2.15"
-swifttools = "<4"
-boto3 = "^1.34.136"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = ">=6.0,<7.2"
