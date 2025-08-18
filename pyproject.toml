@@ -18,7 +18,7 @@ packages = [{include = "tom_swift"}]
 
 
 [tool.poetry.group.lint.dependencies]
-flake8 = ">=6.0,<7.2"
+flake8 = ">=6.0,<7.4"
 
 [tool.poetry-dynamic-versioning]
 enable = true
