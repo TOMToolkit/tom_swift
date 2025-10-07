@@ -1,0 +1,30 @@
+<div class="card">
+    <div class="card-header bg-dark text-light">
+        <div style="display: flex; justify-content: space-between">
+            <h4 class="card-title">Swift Facility User Info</h4>
+            <div>
+                <a
+                    title="Edit"
+                    href="{% url 'tom_swift:swift-profile-update' pk=swift_profile.id %}"
+                    ><i class="fa fa-pencil" aria-hidden="true"></i
+                ></a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <p>
+            Swift TOO Configuration
+        </p>
+        <hr />
+        <dl class="row">
+            {% for field_data in profile_data_list %}
+                {% if field_data.value %}
+                    <dt class="col-sm-6">{{ field_data.label }}</dt>
+                    <dd class="col-sm-6">{{ field_data.value }}</dd>
+                {% endif %}
+                {% empty %}
+                    <p>No Swift Profile items yet for this user.</p>
+            {% endfor %}
+        </dl>
+    </div>
+</div>
