@@ -9,9 +9,10 @@ Notes:
   - more notes
 """
 import logging
+from typing import Tuple
 
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib.auth.models import User
 
 from requests.exceptions import ConnectionError
 
@@ -33,22 +34,34 @@ class SwiftAPI:
     def __init__(self, debug=True):
         self.too = TOO()
         self.too_request = TOORequests()
+        self.credentials_set = False
 
-    def get_credentials(self) -> (str, str):
-        """returns username and password from settings.py
-
-        Use username and password to set the too.username and too.shared_secret respectively.
+    def set_credentials(self, username: str, shared_secret: str):
         """
-        try:
-            username = settings.FACILITIES['SWIFT'].get('SWIFT_USERNAME', 'SWIFT_USERNAME not configured')
-            shared_secret = settings.FACILITIES['SWIFT'].get('SWIFT_SHARED_SECRET',
-                                                             'SWIFT_SHARED_SECRET not configured')
+        Set Swift credentials for API access.
 
-            logger.info(f'swift username: {username}')
-        except KeyError:
-            logger.error("'SWIFT' configuration dictionary not defined in settings.FACILITIES")
-            raise ImproperlyConfigured
-        return username, shared_secret
+        This replaces the settings-based credential approach with user-specific credentials.
+
+        :param username: Swift username
+        :param shared_secret: Swift shared secret (not password)
+        """
+        self.too.username = username
+        self.too.shared_secret = shared_secret
+        self.credentials_set = True
+        logger.info(f'Swift API credentials set for username: {username}')
+
+    def get_credentials(self, user: User) -> Tuple[str, str]:
+        """Returns the currently set credentials.
+
+        Credentials must have been previously set via set_credentials().
+        This method no longer attempts to retrieve credentials from settings.
+        """
+        if not self.credentials_set:
+            raise ImproperlyConfigured(
+                'Swift API credentials have not been set. '
+                'Call set_credentials() before accessing credentials.'
+            )
+        return self.too.username, self.too.shared_secret
 
     def resolve_target(self, target: Target):
         """

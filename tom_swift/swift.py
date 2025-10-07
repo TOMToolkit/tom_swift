@@ -3,12 +3,20 @@ import logging
 from crispy_forms.layout import Layout, Div, Field
 from crispy_forms.bootstrap import Accordion, AccordionGroup
 from django import forms
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.safestring import mark_safe
 
-from tom_observations.facility import BaseObservationForm, BaseObservationFacility, get_service_class
+from tom_observations.facility import (
+    BaseObservationForm,
+    BaseObservationFacility,
+    CredentialStatus,
+    get_service_class
+)
 from tom_targets.models import Target
 
+from tom_common.session_utils import get_encrypted_field
 from tom_swift import __version__
+from tom_swift.models import SwiftProfile
 from tom_swift.swift_api import (SwiftAPI,
                                  SWIFT_INSTRUMENT_CHOICES,
                                  SWIFT_OTHER_CHOICE,
@@ -287,6 +295,19 @@ class SwiftObservationForm(BaseObservationForm):
     #
     debug = forms.BooleanField(required=False, label='Debug', initial=True)
 
+    def __init__(self, *args, **kwargs):
+        logger.debug(f'SwiftObservationForm.__init__ kwargs: {kwargs}')
+        facility = kwargs.pop('facility', None)
+        super().__init__(*args, **kwargs)
+
+        if facility is None:
+            logger.warning('SwiftObservationForm.__init__ called without facility context!')
+            return
+
+        # Store facility reference for use in validation
+        self.facility = facility
+
+
     def layout(self):
         layout = Layout(
             'urgency',
@@ -392,7 +413,7 @@ class SwiftObservationForm(BaseObservationForm):
         logger.debug(f'SwiftObservationForm.is_valid -- observation_payload: {observation_payload}')
 
         # BaseObservationForm.is_valid() says to make this call the Facility.validate_observation() method
-        observation_module = get_service_class(self.cleaned_data['facility'])
+        # Use the facility instance that was passed to the form (already configured with user credentials)
 
         # validate_observation needs to return a list of (field, error) tuples
         # if the list is empty, then the observation is valid
@@ -402,7 +423,7 @@ class SwiftObservationForm(BaseObservationForm):
         # of the swifttoolkit.Swift_TOO object (unless we want to maintain a mapping between
         # the two). NB: field can be None.
         #
-        errors: [] = observation_module().validate_observation(observation_payload)
+        errors: [] = self.facility.validate_observation(observation_payload)
 
         if errors:
             self.add_error(None, errors)
@@ -444,7 +465,81 @@ class SwiftObservationForm(BaseObservationForm):
 class SwiftFacility(BaseObservationFacility):
     def __init__(self):
         super().__init__()
-        self.swift_api = SwiftAPI()
+        self.swift_api = None
+
+    def set_user(self, user):
+        """Set the user and configure Swift-specific credentials."""
+        super().set_user(user)
+        self._configure_credentials()
+
+    def _configure_credentials(self):
+        """
+        Configure Swift-specific credentials and API client.
+
+        This method implements the credential management use case:
+        - Failure Path 1: No SwiftProfile → raise ImproperlyConfigured
+        - Failure Path 2: Empty credentials → fall back to settings defaults
+        - Failure Path 3: No defaults in settings → raise ImproperlyConfigured
+
+        The credential_status property tracks the current state.
+        """
+        if self.user is None:
+            logger.warning('SwiftFacility._configure_credentials called with None user!')
+            self.swift_api = None
+            self.credential_status = CredentialStatus.NOT_INITIALIZED
+            return
+
+        try:
+            # Try to get user's SwiftProfile
+            try:
+                swift_profile = SwiftProfile.objects.get(user=self.user)
+            except SwiftProfile.DoesNotExist:
+                # Failure Path 1: No profile exists
+                self._raise_no_profile_error(self.user, 'Swift')
+
+            # Get credentials from profile
+            swift_username = swift_profile.swift_username
+            swift_shared_secret = get_encrypted_field(self.user, swift_profile, 'swift_shared_secret')
+
+            # Check if credentials are empty
+            if self._is_credential_empty(swift_username) or self._is_credential_empty(swift_shared_secret):
+                # Failure Path 2: Profile exists but credentials empty
+                # Try to fall back to defaults from settings
+                logger.warning(f'SwiftProfile exists but credentials empty for user {self.user.username}')
+
+                try:
+                    # Failure Path 3: Try to get defaults, may raise ImproperlyConfigured
+                    default_creds = self._get_setting_credentials('SWIFT', ['username', 'shared_secret'])
+                    swift_username = default_creds['username']
+                    swift_shared_secret = default_creds['shared_secret']
+
+                    # Successfully using defaults
+                    self.swift_api = SwiftAPI()
+                    self.swift_api.set_credentials(swift_username, swift_shared_secret)
+                    self.credential_status = CredentialStatus.USING_DEFAULTS
+                    logger.warning(
+                        f'Using default Swift credentials from settings for user {self.user.username}. '
+                        f'Configure SwiftProfile for better security.'
+                    )
+                except ImproperlyConfigured:
+                    # Failure Path 3: No defaults available
+                    self._raise_no_defaults_error(self.user, 'Swift')
+            else:
+                # Happy path: Using user credentials
+                self.swift_api = SwiftAPI()
+                self.swift_api.set_credentials(swift_username, swift_shared_secret)
+                self.credential_status = CredentialStatus.USING_USER_CREDS
+                logger.info(f'SwiftFacility initialized with user credentials for {self.user.username}')
+
+        except ImproperlyConfigured:
+            # Re-raise configuration errors
+            raise
+        except Exception as ex:
+            # Unexpected errors
+            logger.error(f'Unexpected exception setting up Swift API for user {self.user.username}: {ex}')
+            self.swift_api = None
+            self.credential_status = CredentialStatus.NOT_INITIALIZED
+            raise
 
     name = 'Swift'
     observation_types = [
@@ -467,7 +562,7 @@ class SwiftFacility(BaseObservationFacility):
         logger.debug(f'get_facility_context_data -- kwargs: {kwargs}')
 
         # get the username from the SwiftAPI for the context
-        username = self.swift_api.get_credentials()[0]  # returns (username, shared_secret)
+        username, _ = self.swift_api.get_credentials(self.user)  # returns (username, shared_secret)
         new_context_data = {
             'version': __version__,  # from tom_swift/__init__.py
             'username': username,
@@ -552,7 +647,7 @@ class SwiftFacility(BaseObservationFacility):
         #
         # User identification
         #
-        self.swift_api.too.username, self.swift_api.too.shared_secret = self.swift_api.get_credentials()
+        self.swift_api.too.username, self.swift_api.too.shared_secret = self.swift_api.get_credentials(self.user)
 
         #
         # Source name, type, location, position_error
