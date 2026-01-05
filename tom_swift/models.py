@@ -22,10 +22,10 @@ class SwiftProfile(EncryptableModelMixin, models.Model):
     We only need the User's Swift username and shared_secret. So, those are
     the fields of the SwiftProfile model.
     """
+
     swift_username = models.CharField(
-        max_length=255,
-        null=True, blank=True,
-        verbose_name='Swift Username')
+        max_length=255, null=True, blank=True, verbose_name="Swift Username"
+    )
 
     _swift_shared_secret = models.BinaryField(null=True, blank=True)
-    swift_shared_secret = EncryptedProperty('_swift_shared_secret')
+    swift_shared_secret = EncryptedProperty("_swift_shared_secret")

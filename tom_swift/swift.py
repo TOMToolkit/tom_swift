@@ -755,15 +755,13 @@ class SwiftFacility(BaseObservationFacility):
         # Instrument mode
         #
         # self.swift_api.too.instrument is set above in the TOO Request details section
-        # Set and unset too.attributes according to the instrument selected.
+        # Set instrument-specific modes (but don't remove from api_data yet)
         if self.swift_api.too.instrument == 'BAT':
-            # not sure what to do here!  TODO: find out
-            self.swift_api.too.xrt_mode = None
-            self.swift_api.too.uvot_mode = None
+            # BAT doesn't use XRT or UVOT modes
             self.swift_api.too.uvot_just = None
         elif self.swift_api.too.instrument == 'UVOT':
+            # UVOT uses uvot_mode but not xrt_mode
             self.swift_api.too.uvot_just = observation_payload['uvot_just']
-            self.swift_api.too.xrt_mode = None
             if observation_payload['uvot_mode_choices'] == SWIFT_OTHER_CHOICE:
                 # use the value from the uvot_mode text field
                 self.swift_api.too.uvot_mode = observation_payload['uvot_mode']
@@ -771,9 +769,8 @@ class SwiftFacility(BaseObservationFacility):
                 # use the value from the drop-down menu
                 self.swift_api.too.uvot_mode = observation_payload['uvot_mode_choices']
         else:
-            # XRT mode
+            # XRT mode - uses xrt_mode but not uvot_mode
             self.swift_api.too.xrt_mode = observation_payload['xrt_mode']
-            self.swift_api.too.uvot_mode = None
             self.swift_api.too.uvot_just = None
 
         # WARNING: Setting too.slew_in_place to False causes a timeout error in too.server_validate() !!!

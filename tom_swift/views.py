@@ -18,7 +18,7 @@ class ProfileUpdateView(UpdateView):
     ``tom_base/tom_common/templatetags/user_extras.py::show_app_profiles``).
     """
     model = SwiftProfile
-    template_name = 'tom_eso/eso_update_user_profile.html'
+    template_name = 'tom_swift/swift_update_user_profile.html'
 
     # we need a custom form class to handle the encrypted field
     form_class = SwiftProfileForm
