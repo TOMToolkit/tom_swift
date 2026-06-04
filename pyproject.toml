@@ -6,9 +6,9 @@ license = {text = "GPL-3.0-or-later"}
 readme = "README.md"
 version = "0.0.0" # version supplied by poetry-dynamic-versioning
 dynamic = ["version"]
-requires-python = ">=3.9.0,<3.13"
+requires-python = ">=3.10.0,<3.14"
 dependencies = [
-    "tomtoolkit >=2.15,<3",
+    "tomtoolkit>=3.0.0a0",
     "swifttools <4",
     "boto3 <2",
 ]
