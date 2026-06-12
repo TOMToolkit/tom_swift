@@ -8,7 +8,7 @@ version = "0.0.0" # version supplied by poetry-dynamic-versioning
 dynamic = ["version"]
 requires-python = ">=3.10.0,<3.14"
 dependencies = [
-    "tomtoolkit>=3.0.0a0",
+    "tomtoolkit>=3.0.0a10",
     "swifttools <4",
     "boto3 <2",
 ]
