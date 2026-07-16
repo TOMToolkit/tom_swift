@@ -4,7 +4,6 @@ description = "TOM Toolkit Facility module for the Neil Gehrels Swift Observator
 authors = [{name = "Lindy Lindstrom", email = "llindstrom@lco.global"}]
 license = {text = "GPL-3.0-or-later"}
 readme = "README.md"
-version = "0.0.0" # version supplied by poetry-dynamic-versioning
 dynamic = ["version"]
 requires-python = ">=3.10.0,<3.14"
 dependencies = [
@@ -14,8 +13,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "tom_swift"}]
-
+version = "0.0.0" # version supplied by poetry-dynamic-versioning
 
 [tool.poetry.group.lint.dependencies]
 flake8 = ">=6.0,<7.4"
