@@ -7,7 +7,7 @@ readme = "README.md"
 dynamic = ["version"]
 requires-python = ">=3.10.0,<3.14"
 dependencies = [
-    "tomtoolkit>=3.0.0,<4.0.0",
+    "tomtoolkit>=3.0.1,<4.0.0",
     "swifttools <4",
     "boto3 <2",
 ]
