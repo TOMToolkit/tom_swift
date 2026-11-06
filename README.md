@@ -1,4 +1,6 @@
 # tom_swift
+## This repository has been archived following the end of the Swift mission and the satellite's re-entry into the atmosphere.
+
 [Neil Gehrels Swift Observatory](https://swift.gsfc.nasa.gov/index.html) facility module for TOM Toolkit. This module uses the
 [Swift TOO API](https://www.swift.psu.edu/too_api/) for all its interactions with the _Swift_ Observatory. When installed and
 configured, your TOM can query target visibility, submit TOO observation requests to Swift, and check TOO observation status.
